@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Latest compiled and minified CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
+    <title>Dojo Zoom Attendance Visualizer</title>
+</head>
+
+<body class="bg-dark text-light">
+    <div class="container">
+        <header class="card-header bg-primary">
+            <h1>Dojo Zoom Attendance Visualizer</h1>
+        </header>
+
+        <form id="attendance-get" class="mb-2">
+            <div class="mt-3 mb-3">
+                <input class="form-control" type="file" name="csvFile" id="csvFile" accept=".csv">
+            </div>
+            <div class="form-group mb-2">
+                <label for="offset">Select an offset</label>
+                <select class="form-control-sm" name="offset" id="offset">
+                    <option value="-3">-3</option>
+                    <option value="-2">-2</option>
+                    <option value="-1">-1</option>
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                </select>
+            </div>
+            <input class=" btn btn-primary" type="submit" value="Check Attendance">
+        </form>
+        <div class="card d-flex flex-row justify-content-around mb-2 p-2">
+            <div class="form-group d-flex flex-column">
+                <label class="text-dark form-label" for="first-period-start">Algo Start</label>
+                <input class="form-control-sm" type="time" name="first-period-start" id="first-period-start" placeholder="Algo Start">
+            </div>
+            <div class="form-group d-flex flex-column">
+                <label class="text-dark form-label" for="first-period-end">Algo End</label>
+                <input class="form-control-sm" type="time" name="first-period-end" id="first-period-end" placeholder="Algo End">
+            </div>
+            <div class="form-group d-flex flex-column">
+                <label class="text-dark form-label" for="second-period-start">Lecture Start</label>
+                <input class="form-control-sm" type="time" name="second-period-start" id="second-period-start" placeholder="Lecture Start">
+            </div>
+            <div class="form-group d-flex flex-column">
+                <label class="text-dark form-label" for="second-period-end">Lecture End</label>
+                <input class="form-control-sm" type="time" name="second-period-end" id="second-period-end" placeholder="Lecture End">                
+            </div>
+        
+            <div class="form-group d-flex flex-column">
+                <label class="text-dark form-label" for="third-period-start">Afternoon Start</label>
+                <input class="form-control-sm" type="time" name="third-period-start" id="third-period-start" placeholder="Afternoon Start">
+            </div>
+            <div class="form-group d-flex flex-column">
+                <label class="text-dark form-label" for="second-period-start">Lecture End</label>
+                <input class="form-control-sm" type="time" name="third-period-end" id="third-period-end" placeholder="Afternoon End">
+            </div>
+            <div class="form-group d-flex flex-column">
+                <label class="text-dark form-label" >update</label>
+                <button class="form-control-sm" id="update-button" disabled>Update</button>
+            </div>
+        </div>
+        <div id="stud-data" class="card text-dark p-1">
+            <table class="table">
+                <thead>
+                    <tr class="sticky-top bg-primary text-light">
+                        <th class="col-1" scope="col">#</th>
+                        <th class="col-2" scope="col">Name</th>
+                        <th id="time-legend" class="col-8" scope="col">
+                            <div class="d-flex justify-content-between">
+                                <p class="label" id="l0">6am</p>
+                                <p class="label" id="l1" >7am</p>
+                                <p class="label" id="l2">8am</p>
+                                <p class="label" id="l3">9am</p>
+                                <p class="label" id="l4">10am</p>
+                                <p class="label" id="l5">11am</p>
+                                <p class="label" id="l6">12pm</p>
+                                <p class="label" id="l7">1pm</p>
+                                <p class="label" id="l8">2pm</p>
+                                <p class="label" id="l9">3pm</p>
+                                <p class="label" id="l10">4pm</p>
+                                <p class="label" id="l11">5pm</p>
+                                <p class="label" id="l12">6pm</p>
+                            </div>
+                        </th>
+                        <th class="col-1" scope="col">TT in Zoom</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="./parse.js"></script>
+    <script src="./timeline.js"></script>
+</body>
+
+</html>
