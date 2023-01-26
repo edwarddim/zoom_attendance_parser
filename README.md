@@ -13,4 +13,4 @@ You should also make sure that you have a modern web browser installed on your d
 Thank you for using the Zoom Attendance Web Application!
 
 
-## Please let ne know if you have any questions or feedback.
+## Please let me know if you have any questions or feedback.
