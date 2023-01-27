@@ -6,19 +6,23 @@ const port = 8000;
 app.use(express.json());
 app.use(express.urlencoded());
 
-
+//press authorize button to start request
 app.get('/', (req,res)=>{
     res.sendFile(path.join(__dirname) + '/zoomtest.html')
 })
 
-app.get('/success', async (req,res)=>{
-        console.log(req.query.code)
-        const accessToken = req.query.code
 
+//single endpoint for Oauth Requests
+app.get('/success', async (req,res)=>{
+        //console.log(req.query.code)
+        //user authentication token
+        const accessToken = req.query.code
+        //axios configuration
         var config ={
             method: 'post',
             url: 'https://zoom.us/oauth/token',
             headers:{
+                //"Basic " plus Base64-encoded clientID:clientSECRET from https://www.base64encode.org/
                 'Authorization' :'Basic ' + 'dFB2djVtNG9RTEtaVkp5OXhHbHgyQTp1Z3YyQnV0YkhrdjJ5ZHBxN1YydGlIUFB0NHhDblJ5OA==',
                 'content-type' : 'application/x-www-form-urlencoded'
             },
@@ -29,27 +33,11 @@ app.get('/success', async (req,res)=>{
             }
         }
 
-        // axios.post({
-        //     headers:{'Authorization' : 'Basic ' + 'ugv2ButbHkv2ydpq7V2tiHPPt4xCnRy8', 'content-type' : 'application/x-www-form-urlencoded'},
-        //     url: 'https://zoom.us/oauth/token',
-        //     body:{
-        //         "code": accessToken,
-        //         "grant_type": "authorization_code",
-        //         "redirect_uri": "https://localhost:8000/access",
-        //         },
-        //     json:true
-        //     },
-        //         function(error,response,body){
-        //             //console.log('error' + error)
-        //             //console.log('response' + response)
-        //             console.log('body' + JSON.stringify(body))
-        //         })
-        //     res.redirect('/')
-        
+        //axios request => res.data = {access_token: ... , token_type: ..., refresh_token: ..., expires_in: ..., scope: ...}
         var result = await axios(config).then(res =>{
-            console.log(res)
+            console.log(res.data)
         }).catch(err =>{
-            console.log(err)
+            console.log(err.data)
         })
         
         res.redirect('/')
