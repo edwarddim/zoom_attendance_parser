@@ -1,0 +1,14 @@
+#meetingsList{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+#meetingsList>*{
+    flex: 0 0 25%;
+}
+
+.meeting{
+    
+    border: 1 px solid black;
+}

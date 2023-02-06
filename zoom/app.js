@@ -52,7 +52,7 @@ app.get('/success', async (req,res)=>{
 
         //axios request => res.data = {access_token: ... , token_type: ..., refresh_token: ..., expires_in: ..., scope: ...}
         var result = await axios(config).then(res =>{
-            console.log(res.data);
+            //console.log(res.data);
             req.session['authorized'] = true;
             req.session['access_token'] = res.data.access_token
             req.session['refresh_token'] = res.data.refresh_token
@@ -83,11 +83,11 @@ app.post('/users', async (req,res)=>{
         //console.log('data',Object.keys(data.data));
         
         userData = (data.data.users);
-        console.log('after userData');
+        //console.log('after userData');
         config.url+='&next_page_token='+data.data.next_page_token;
-        console.log(config);
+        //console.log(config);
         var next = await axios(config).then(moreData =>{
-            console.log('moredata',moreData);
+            //console.log('moredata',moreData);
             userData = userData.concat(moreData.data.users)
             res.json({'users':userData});
         })
@@ -97,23 +97,27 @@ app.post('/users', async (req,res)=>{
     })
 })
 
-app.post('/meetings', async (req,res)=>{
+app.post('/meetings/:userId', async (req,res)=>{
+    console.log('resquesting meetings for userId',req.params.userId)
     var config ={
         method: 'get',
-        url: 'https://zoom.us/v2/users/s_iIgi4tRiO1oGD48T6GgQ/meetings',
+        url: 'https://zoom.us/v2/users/'+req.params.userId+'/meetings',
         headers:{
             //"Basic " plus Base64-encoded clientID:clientSECRET from https://www.base64encode.org/
             'Authorization' :'Bearer ' + req.session['access_token'],
         },
         
     }
-
+    var meetings =[]
     //axios request => res.data = {access_token: ... , token_type: ..., refresh_token: ..., expires_in: ..., scope: ...}
-    var result = await axios(config).then(res =>{
-        console.log(res.data)
+    var result = await axios(config).then(data =>{
+        //console.log(data.data)
+        meetings = data.data.meetings;
+        res.json({meetings:meetings})
     }).catch(err =>{
         console.log(err.data)
     })
+    console.log('result is',result)
 })
 app.post('/part', async (req,res)=>{
     var config ={
