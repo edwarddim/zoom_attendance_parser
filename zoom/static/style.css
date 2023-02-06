@@ -1,14 +1,23 @@
+*{
+    padding: 0;
+    margin: 0;
+}
+
+
 #meetingsList{
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
+    column-gap: 10px;
 }
 #meetingsList>*{
-    flex: 0 0 25%;
+    flex: 0 0 20%;
 }
 
 .meeting{
-    
-    border: 1 px solid black;
+    height: 150px;
+    box-sizing: border-box;
+    border: 1px solid black;
+    padding: 5px;
 }

@@ -96,7 +96,7 @@ app.post('/users', async (req,res)=>{
         console.log(err.data)
     })
 })
-
+//get list of meetings for a user
 app.post('/meetings/:userId', async (req,res)=>{
     console.log('resquesting meetings for userId',req.params.userId)
     var config ={
@@ -117,7 +117,7 @@ app.post('/meetings/:userId', async (req,res)=>{
     }).catch(err =>{
         console.log(err.data)
     })
-    console.log('result is',result)
+    //console.log('result is',result)
 })
 app.post('/part', async (req,res)=>{
     var config ={
@@ -138,6 +138,48 @@ app.post('/part', async (req,res)=>{
     })
 })
 
+
+//get details of a specific meeting
+app.post('/meeting/:meetingId', async (req,res)=>{
+    console.log('resquesting meeting details',req.params.meetingId)
+    var config ={
+        method: 'get',
+        url: 'https://zoom.us/v2/meetings/'+req.params.meetingId,
+        headers:{
+            //"Basic " plus Base64-encoded clientID:clientSECRET from https://www.base64encode.org/
+            'Authorization' :'Bearer ' + req.session['access_token'],
+        },
+        
+    }
+    var details ={}
+    //axios request => res.data = {access_token: ... , token_type: ..., refresh_token: ..., expires_in: ..., scope: ...}
+    var result = await axios(config).then(data =>{
+        console.log(data.data)
+        details = data.data;
+        res.json({occurrences:details.occurrences})
+    }).catch(err =>{
+        console.log(err.data)
+    })
+    //console.log('result is',result)
+})
+app.post('/part', async (req,res)=>{
+    var config ={
+        method: 'get',
+        url: 'https://zoom.us/v2/report/meetings/83190389871/participants',
+        headers:{
+            //"Basic " plus Base64-encoded clientID:clientSECRET from https://www.base64encode.org/
+            'Authorization' :'Bearer ' + req.session['access_token'],
+        },
+        
+    }
+
+    //axios request => res.data = {access_token: ... , token_type: ..., refresh_token: ..., expires_in: ..., scope: ...}
+    var result = await axios(config).then(res =>{
+        console.log('data'+JSON.stringify(res.data))
+    }).catch(err =>{
+        console.log('err' + err)
+    })
+})
 
 
 app.listen(port,()=>{
