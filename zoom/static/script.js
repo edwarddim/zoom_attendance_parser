@@ -36,12 +36,13 @@ getUsers()
 const addMeetingElem =(meeting)=>{
     let elem = document.createElement('div')
     elem.innerHTML = `<h2>${meeting.topic}</h2><h3>${meeting.id}</h3><button onclick="getMeeting(${meeting.id})">Recent</button>`
-    elem.classList.add("meeting")
+    elem.classList.add("card")
     return elem 
 }
 
 const getMeetings = ()=>{
     meetingsList.innerHTML = '';
+    occurrenceslist.innerHTML = '';
     console.log('getting meetings for ', userlist.options[userlist.selectedIndex].text, userlist.value )
     fetch('http://localhost:8000/meetings/'+userlist.value,{method:"POST"})
     .then((res)=>res.json())
@@ -56,13 +57,14 @@ const getMeetings = ()=>{
 
 const addOccurrenceElem = (meetingID,meeting)=>{
     let elem = document.createElement('div')
-    elem.innerHTML = `<h2>${meeting.occurrence_id}</h2><h3>${meeting.start_time}</h3><button onclick="getOccurance(${meetingID},${meeting.occurrence_id})">Attendance</button>`
-    elem.classList.add("meeting")
+    elem.innerHTML = `<h2>${meeting.uuid}</h2><h3>${meeting.start_time}</h3><button onclick="getAttendance('${meeting.uuid}')">Attendance</button>`
+    elem.classList.add("card")
     return elem 
 }
 
 let occurrences = [];
 const getMeeting = (meetingId)=>{
+    occurrenceslist.innerHTML = '';
     //console.log('getting meeting', )
     fetch('http://localhost:8000/meeting/'+meetingId,{method:"POST"})
 
@@ -76,26 +78,11 @@ const getMeeting = (meetingId)=>{
     })
 }
 
-//GetOccurance uuid
-
-const getOccurance = (meetingId,occurrenceId)=>{
-    console.log('Getting occurance', occurrenceId);
-    fetch(`http://localhost:8000/occurrence/${meetingId}/${occurrenceId}`,{method:"POST"})
-    .then((res)=>res.json())
-    .then(res=>{
-        console.log('got occurrence',res)
-        getAttendance(res.uuid)
-    })
-
-}
-
-
-
 //GET ATTENDANCE
 
 const getAttendance = (meeting)=>{
-    console.log('Some day....');
-    fetch("http://localhost:8000/part/"+83349520392,{method:'POST'})
+    console.log('Some day....',meeting);
+    fetch("http://localhost:8000/part/"+meeting,{method:'POST'})
     .then(res=>res.json())
     .then(res=>{
         console.log('parts????',res)

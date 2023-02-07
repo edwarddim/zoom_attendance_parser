@@ -144,7 +144,7 @@ app.post('/meeting/:meetingId', async (req,res)=>{
     console.log('resquesting meeting details',req.params.meetingId)
     var config ={
         method: 'get',
-        url: 'https://zoom.us/v2/meetings/'+req.params.meetingId+'?show_previous_occurrences=true',
+        url: 'https://zoom.us/v2/past_meetings/'+req.params.meetingId+'/instances',
         headers:{
             //"Basic " plus Base64-encoded clientID:clientSECRET from https://www.base64encode.org/
             'Authorization' :'Bearer ' + req.session['access_token'],
@@ -154,14 +154,17 @@ app.post('/meeting/:meetingId', async (req,res)=>{
     var details ={}
     //axios request => res.data = {access_token: ... , token_type: ..., refresh_token: ..., expires_in: ..., scope: ...}
     var result = await axios(config).then(data =>{
-        //console.log(data.data)
+        console.log(data.data)
         details = data.data;
-        res.json({occurrences:details.occurrences})
+        res.json({occurrences:details.meetings})
     }).catch(err =>{
         console.log(err.data)
     })
     //console.log('result is',result)
 })
+
+
+
 app.post('/part/:meetingId', async (req,res)=>{
     console.log('parts id',req.params.meetingId);
     var config ={
