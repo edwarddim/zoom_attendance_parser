@@ -3,6 +3,8 @@ console.log('loaded script')
 let userlist = document.getElementById('usersSelect')
 let meetingslist = document.getElementById('meetingsList')
 let occurrenceslist = document.getElementById('occurrencesList')
+let attendanceslist = document.getElementById('attendancesList')
+
 const getUsers = ()=>{
     console.log('prefetch');
     fetch('http://localhost:8000/users',{method:'POST'})
@@ -80,11 +82,21 @@ const getMeeting = (meetingId)=>{
 
 //GET ATTENDANCE
 
+const processRecord = (record)=>{
+    let elem = document.createElement('div')
+    elem.innerHTML = `<h2>${record.name}</h2><h3>${record.user_email}</h3> <h4>Login: ${record.join_time} - Logout: ${record.leave_time}</h4>`
+    elem.classList.add("card")
+    return elem 
+}
+
 const getAttendance = (meeting)=>{
     console.log('Some day....',meeting);
     fetch("http://localhost:8000/part/"+meeting,{method:'POST'})
     .then(res=>res.json())
     .then(res=>{
         console.log('parts????',res)
+        res.participants.forEach(record =>{
+            attendanceslist.append(processRecord(record))
+        })
     })
 }
