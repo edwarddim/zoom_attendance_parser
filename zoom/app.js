@@ -144,7 +144,7 @@ app.post('/meeting/:meetingId', async (req,res)=>{
     console.log('resquesting meeting details',req.params.meetingId)
     var config ={
         method: 'get',
-        url: 'https://zoom.us/v2/meetings/'+req.params.meetingId,
+        url: 'https://zoom.us/v2/meetings/'+req.params.meetingId+'?show_previous_occurrences=true',
         headers:{
             //"Basic " plus Base64-encoded clientID:clientSECRET from https://www.base64encode.org/
             'Authorization' :'Bearer ' + req.session['access_token'],
@@ -154,7 +154,7 @@ app.post('/meeting/:meetingId', async (req,res)=>{
     var details ={}
     //axios request => res.data = {access_token: ... , token_type: ..., refresh_token: ..., expires_in: ..., scope: ...}
     var result = await axios(config).then(data =>{
-        console.log(data.data)
+        //console.log(data.data)
         details = data.data;
         res.json({occurrences:details.occurrences})
     }).catch(err =>{
@@ -162,10 +162,11 @@ app.post('/meeting/:meetingId', async (req,res)=>{
     })
     //console.log('result is',result)
 })
-app.post('/part', async (req,res)=>{
+app.post('/part/:meetingId', async (req,res)=>{
+    console.log('parts id',req.params.meetingId);
     var config ={
         method: 'get',
-        url: 'https://zoom.us/v2/report/meetings/83190389871/participants',
+        url: `https://zoom.us/v2/report/meetings/${req.params.meetingId}/participants`,
         headers:{
             //"Basic " plus Base64-encoded clientID:clientSECRET from https://www.base64encode.org/
             'Authorization' :'Bearer ' + req.session['access_token'],
@@ -174,8 +175,32 @@ app.post('/part', async (req,res)=>{
     }
 
     //axios request => res.data = {access_token: ... , token_type: ..., refresh_token: ..., expires_in: ..., scope: ...}
-    var result = await axios(config).then(res =>{
-        console.log('data'+JSON.stringify(res.data))
+    var result = await axios(config).then(data =>{
+        console.log('data'+data.data)
+        res.json(data.data)
+    }).catch(err =>{
+        console.log('err' + err)
+    })
+})
+
+//get occurence uuid from meeting id and occurence id
+
+app.post('/occurrence/:meetingId/:occurrenceId',async (req,res)=>{
+    console.log('getting occurence uuid',req.params.meetingId,req.params.occurrenceId);
+    var config ={
+        method: 'get',
+        url: `https://zoom.us/v2/meetings/${req.params.meetingId}/?occurrence_id=${req.params.occurrenceId}`,
+        headers:{
+            //"Basic " plus Base64-encoded clientID:clientSECRET from https://www.base64encode.org/
+            'Authorization' :'Bearer ' + req.session['access_token'],
+        },
+        
+    }
+
+    //axios request => res.data = {access_token: ... , token_type: ..., refresh_token: ..., expires_in: ..., scope: ...}
+    var result = await axios(config).then(data =>{
+        console.log('uuid',(data.data.uuid))
+        res.json({uuid:data.data.uuid})
     }).catch(err =>{
         console.log('err' + err)
     })

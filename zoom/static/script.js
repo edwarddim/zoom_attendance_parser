@@ -54,32 +54,50 @@ const getMeetings = ()=>{
 
 //GET MEETING
 
-const addOccurrenceElem = (meeting)=>{
+const addOccurrenceElem = (meetingID,meeting)=>{
     let elem = document.createElement('div')
-    elem.innerHTML = `<h2>${meeting.occurrence_id}</h2><h3>${meeting.start_time}</h3><button onclick="getAttendance(${meeting.start_time})">Attendance</button>`
+    elem.innerHTML = `<h2>${meeting.occurrence_id}</h2><h3>${meeting.start_time}</h3><button onclick="getOccurance(${meetingID},${meeting.occurrence_id})">Attendance</button>`
     elem.classList.add("meeting")
     return elem 
 }
 
 let occurrences = [];
 const getMeeting = (meetingId)=>{
-    console.log('getting meeting', )
+    //console.log('getting meeting', )
     fetch('http://localhost:8000/meeting/'+meetingId,{method:"POST"})
+
+    
     .then((res)=>res.json())
     .then(res=>{
-        console.log('got meeting',res)
+        //console.log('got meeting',res)
         res.occurrences.forEach(meeting => {
-            occurrenceslist.append(addOccurrenceElem(meeting))
+            occurrenceslist.append(addOccurrenceElem(meetingId,meeting))
         });
     })
 }
 
+//GetOccurance uuid
 
+const getOccurance = (meetingId,occurrenceId)=>{
+    console.log('Getting occurance', occurrenceId);
+    fetch(`http://localhost:8000/occurrence/${meetingId}/${occurrenceId}`,{method:"POST"})
+    .then((res)=>res.json())
+    .then(res=>{
+        console.log('got occurrence',res)
+        getAttendance(res.uuid)
+    })
+
+}
 
 
 
 //GET ATTENDANCE
 
-const getAttendance = ()=>{
+const getAttendance = (meeting)=>{
     console.log('Some day....');
+    fetch("http://localhost:8000/part/"+83349520392,{method:'POST'})
+    .then(res=>res.json())
+    .then(res=>{
+        console.log('parts????',res)
+    })
 }
