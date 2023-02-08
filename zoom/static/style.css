@@ -4,21 +4,5 @@
 }
 
 
-#meetingsList, #occurrencesList, #attendanceList{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    column-gap: 10px;
-}
-#meetingsList>*, #occurrencesList>*, #attendanceList>*{
-    flex: 0 0 20%;
-}
 
-.card{
-    height: 150px;
-    box-sizing: border-box;
-    border: 1px solid black;
-    padding: 5px;
-}
 

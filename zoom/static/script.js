@@ -36,9 +36,10 @@ getUsers()
 // create meeting html
 
 const addMeetingElem =(meeting)=>{
-    let elem = document.createElement('div')
-    elem.innerHTML = `<h2>${meeting.topic}</h2><h3>${meeting.id}</h3><button onclick="getMeeting(${meeting.id})">Recent</button>`
-    elem.classList.add("card")
+    let elem = document.createElement('option')
+    elem.value = meeting.id
+    elem.innerText = `${meeting.topic}`
+    
     return elem 
 }
 
@@ -57,25 +58,27 @@ const getMeetings = ()=>{
 
 //GET MEETING
 
-const addOccurrenceElem = (meetingID,meeting)=>{
-    let elem = document.createElement('div')
-    elem.innerHTML = `<h2>${meeting.uuid}</h2><h3>${meeting.start_time}</h3><button onclick="getAttendance('${meeting.uuid}')">Attendance</button>`
-    elem.classList.add("card")
+const addOccurrenceElem = (meeting)=>{
+    let elem = document.createElement('option')
+    elem.value = meeting.uuid
+    elem.innerText = `${meeting.start_time}`
+    
     return elem 
 }
 
 let occurrences = [];
-const getMeeting = (meetingId)=>{
+const getMeeting = ()=>{
     occurrenceslist.innerHTML = '';
+    
     //console.log('getting meeting', )
-    fetch('http://localhost:8000/meeting/'+meetingId,{method:"POST"})
+    fetch('http://localhost:8000/meeting/'+meetingslist.value,{method:"POST"})
 
     
     .then((res)=>res.json())
     .then(res=>{
         //console.log('got meeting',res)
         res.occurrences.forEach(meeting => {
-            occurrenceslist.append(addOccurrenceElem(meetingId,meeting))
+            occurrenceslist.append(addOccurrenceElem(meeting))
         });
     })
 }
@@ -89,14 +92,23 @@ const processRecord = (record)=>{
     return elem 
 }
 
-const getAttendance = (meeting)=>{
-    console.log('Some day....',meeting);
-    fetch("http://localhost:8000/part/"+meeting,{method:'POST'})
+let attendance = []
+
+const getAttendance = ()=>{
+    let records = 0
+    attendance = []
+    //console.log('Some day....',meeting);
+    fetch("http://localhost:8000/part/"+occurrenceslist.value,{method:'POST'})
     .then(res=>res.json())
     .then(res=>{
-        console.log('parts????',res)
+        //console.log('parts????',res)
         res.participants.forEach(record =>{
             attendanceslist.append(processRecord(record))
+            attendance.push(record)
         })
+        
+        console.log('attendance:', attendance)
+        
     })
+    
 }

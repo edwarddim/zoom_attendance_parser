@@ -101,7 +101,7 @@ app.post('/meetings/:userId', async (req,res)=>{
     console.log('resquesting meetings for userId',req.params.userId)
     var config ={
         method: 'get',
-        url: 'https://zoom.us/v2/users/'+req.params.userId+'/meetings',
+        url: 'https://zoom.us/v2/users/'+req.params.userId+'/meetings?page_size=300',
         headers:{
             //"Basic " plus Base64-encoded clientID:clientSECRET from https://www.base64encode.org/
             'Authorization' :'Bearer ' + req.session['access_token'],
@@ -122,7 +122,7 @@ app.post('/meetings/:userId', async (req,res)=>{
 app.post('/part', async (req,res)=>{
     var config ={
         method: 'get',
-        url: 'https://zoom.us/v2/report/meetings/83190389871/participants',
+        url: 'https://zoom.us/v2/report/meetings/83190389871/participants?page_size=300',
         headers:{
             //"Basic " plus Base64-encoded clientID:clientSECRET from https://www.base64encode.org/
             'Authorization' :'Bearer ' + req.session['access_token'],
@@ -144,7 +144,7 @@ app.post('/meeting/:meetingId', async (req,res)=>{
     console.log('resquesting meeting details',req.params.meetingId)
     var config ={
         method: 'get',
-        url: 'https://zoom.us/v2/past_meetings/'+req.params.meetingId+'/instances',
+        url: 'https://zoom.us/v2/past_meetings/'+req.params.meetingId+'/instances?page_size=300',
         headers:{
             //"Basic " plus Base64-encoded clientID:clientSECRET from https://www.base64encode.org/
             'Authorization' :'Bearer ' + req.session['access_token'],
@@ -169,7 +169,7 @@ app.post('/part/:meetingId', async (req,res)=>{
     console.log('parts id',req.params.meetingId);
     var config ={
         method: 'get',
-        url: `https://zoom.us/v2/report/meetings/${req.params.meetingId}/participants`,
+        url: `https://zoom.us/v2/report/meetings/${req.params.meetingId}/participants?page_size=300`,
         headers:{
             //"Basic " plus Base64-encoded clientID:clientSECRET from https://www.base64encode.org/
             'Authorization' :'Bearer ' + req.session['access_token'],
@@ -186,28 +186,28 @@ app.post('/part/:meetingId', async (req,res)=>{
     })
 })
 
-//get occurence uuid from meeting id and occurence id
+// //get occurence uuid from meeting id and occurence id
 
-app.post('/occurrence/:meetingId/:occurrenceId',async (req,res)=>{
-    console.log('getting occurence uuid',req.params.meetingId,req.params.occurrenceId);
-    var config ={
-        method: 'get',
-        url: `https://zoom.us/v2/meetings/${req.params.meetingId}/?occurrence_id=${req.params.occurrenceId}`,
-        headers:{
-            //"Basic " plus Base64-encoded clientID:clientSECRET from https://www.base64encode.org/
-            'Authorization' :'Bearer ' + req.session['access_token'],
-        },
+// app.post('/occurrence/:meetingId/:occurrenceId',async (req,res)=>{
+//     console.log('getting occurence uuid',req.params.meetingId,req.params.occurrenceId);
+//     var config ={
+//         method: 'get',
+//         url: `https://zoom.us/v2/meetings/${req.params.meetingId}/?occurrence_id=${req.params.occurrenceId}`,
+//         headers:{
+//             //"Basic " plus Base64-encoded clientID:clientSECRET from https://www.base64encode.org/
+//             'Authorization' :'Bearer ' + req.session['access_token'],
+//         },
         
-    }
+//     }
 
-    //axios request => res.data = {access_token: ... , token_type: ..., refresh_token: ..., expires_in: ..., scope: ...}
-    var result = await axios(config).then(data =>{
-        console.log('uuid',(data.data.uuid))
-        res.json({uuid:data.data.uuid})
-    }).catch(err =>{
-        console.log('err' + err)
-    })
-})
+//     //axios request => res.data = {access_token: ... , token_type: ..., refresh_token: ..., expires_in: ..., scope: ...}
+//     var result = await axios(config).then(data =>{
+//         console.log('uuid',(data.data.uuid))
+//         res.json({uuid:data.data.uuid})
+//     }).catch(err =>{
+//         console.log('err' + err)
+//     })
+// })
 
 
 app.listen(port,()=>{
