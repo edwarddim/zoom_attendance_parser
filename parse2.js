@@ -30,7 +30,7 @@ const flattenParticipants = (zObj) => {
             attendees[attendee.id].durations.push(attendee.duration);
         }
     });
-    console.log(attendees);
+    // console.log(attendees);
     return attendees;
 }
 
@@ -62,13 +62,77 @@ const displayData = (attendeeObj) => {
 // to mst mountian time
 const convertToMST = (dateObj) => {
     let date = new Date(dateObj);
-    console.log(date);
+    // console.log(date);
     let mstDate = date.toLocaleString('en-US', {timeZone: 'America/Denver'})
-    console.log(mstDate);
+    // console.log(mstDate);
     return mstDate;
 }
 
-cleanDataObj(zoomData)
-flattenParticipants(zoomData)
+const showAttendance = (participantsObj) => {
+    // Variables 
+    let i = 1 // record number
+    let startTime = new Date();
+    startTime.setHours(6);
+    startTime.setMinutes(0);
+    console.log(startTime.getHours());
+    let tableBody = document.getElementById("table-body");
+    // create HTML elements
+    
+    
+    for (const participant in participantsObj){
+        let tr = document.createElement("tr");
+        let th0 = document.createElement("th");
+        th0.setAttribute('scope', 'row');
+        let td1 = document.createElement('td');
+        let td2 = document.createElement('td');
+        let td3 = document.createElement('td');
+        let part = participantsObj[participant];
+        let partLen = part.join_times.length;
+        let totalTime = 0;
+        th0.innerText = i; // set the record number
+        td1.innerText = part.name; // set the name 
+        let tempHTML = "";
+        console.log(part);
+        for(let j = 0; j<partLen; j++ ){
+            let joinTime = part.join_times[j];
+            let jt = new Date(joinTime);
+            let st = new Date(joinTime);
+            st.setHours(6);
+            st.setMinutes(0);
+            let startMins = st.getTime()/60000;
+            let joinMins = jt.getTime()/60000;
+            let offset = joinMins-startMins;
+            let joinPercent = Math.round((offset/720)*100);
+            let durationPercent = Math.round(((part.durations[j]/60)/720)*100);
+            if(durationPercent === 0){
+                durationPercent = 1;
+            }
+            console.log("start Time: " + startMins, "Joined Time: " + joinMins, "joined after: " +  offset, "percentage: " + joinPercent, "duration percentage: " + durationPercent );
+            totalTime += part.durations[j];
 
-convertToMST("2023-01-27T21:08:39Z")
+            let attendedHtml = `<div style="position: absolute; left: ${joinPercent}%; height: 100%; width: ${durationPercent}%; background: black;" ></div>`;
+            tempHTML += attendedHtml;
+        }
+
+        totalTime = Math.round(totalTime / 60);
+
+        td2.innerHTML = `<div id="${part.name}" class="timeline-container">${tempHTML}</div>`;
+        td3.innerText = totalTime + " Min(s)";
+        tr.appendChild(th0);
+        tr.appendChild(td1);
+        tr.appendChild(td2);
+        tr.appendChild(td3);
+
+        tableBody.appendChild(tr)
+
+        i++; // increment record
+
+    }
+
+    console.log(participantsObj);
+}
+
+cleanDataObj(zoomData);
+let parList = flattenParticipants(zoomData);
+
+showAttendance(parList);
