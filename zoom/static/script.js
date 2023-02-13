@@ -1,4 +1,4 @@
-console.log('loaded script')
+//console.log('loaded script')
 
 let userlist = document.getElementById('usersSelect')
 let meetingslist = document.getElementById('meetingsList')
@@ -6,7 +6,7 @@ let occurrenceslist = document.getElementById('occurrencesList')
 let attendanceslist = document.getElementById('attendancesList')
 
 const getUsers = ()=>{
-    console.log('prefetch');
+    //console.log('prefetch');
     fetch('http://localhost:8000/users',{method:'POST'})
     
     .then(res=>res.json())
@@ -46,7 +46,7 @@ const addMeetingElem =(meeting)=>{
 const getMeetings = ()=>{
     meetingsList.innerHTML = '';
     occurrenceslist.innerHTML = '';
-    console.log('getting meetings for ', userlist.options[userlist.selectedIndex].text, userlist.value )
+   // console.log('getting meetings for ', userlist.options[userlist.selectedIndex].text, userlist.value )
     fetch('http://localhost:8000/meetings/'+userlist.value,{method:"POST"})
     .then((res)=>res.json())
     .then(res=>{
@@ -98,6 +98,7 @@ const getAttendance = ()=>{
     let records = 0
     attendance = []
     //console.log('Some day....',meeting);
+    //{page_count: 1, page_size: 300, total_records: 155, next_page_token: '', participants: Array(155)}
     fetch("http://localhost:8000/part/"+occurrenceslist.value,{method:'POST'})
     .then(res=>res.json())
     .then(res=>{
@@ -107,7 +108,7 @@ const getAttendance = ()=>{
             attendance.push(record)
         })
         
-        console.log('attendance:', attendance)
+        //console.log('attendance:', attendance)
         
     })
     
