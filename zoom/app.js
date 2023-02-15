@@ -5,6 +5,7 @@ var session = require('express-session')
 const path = require('path');
 const app = express();
 const port = 8000;
+app.set('view engine', 'ejs');
 app.use(cookieParser());
 app.use(session({secret: "I solemnly swear i am upto no good!"}))
 app.use(express.json());
@@ -18,7 +19,7 @@ app.get('/', (req,res)=>{
     if(req.session['authorized']){
         res.redirect('/page')
     }
-    res.sendFile(path.join(__dirname) + '/zoomtest.html')
+    res.render('authorize')
 })
 
 app.get('/page', (req,res)=>{
@@ -26,7 +27,7 @@ app.get('/page', (req,res)=>{
         res.redirect('/')
     }
 
-    res.sendFile(path.join(__dirname) + '/page.html')
+    res.render('attendance')
 })
 
 //single endpoint for Oauth Requests
