@@ -95,6 +95,8 @@ const processRecord = (record)=>{
 let attendanceObj ={}
 
 const getAttendance = ()=>{
+    const elem = document.getElementById('table-body');
+    elem.innerHTML = "";
     let records = 0
     attendance = []
     //console.log('Some day....',meeting);
