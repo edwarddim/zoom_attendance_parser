@@ -116,7 +116,7 @@ const showAttendance = (participantsObj) => {
 
         totalTime = Math.round(totalTime / 60);
 
-        td2.innerHTML = `<div id="${part.name}" class="timeline-container">${tempHTML}</div>`;
+        td2.innerHTML = `<div id="${part.name.replace(" ", "_")}" class="timeline-container">${tempHTML}</div>`;
         td3.innerText = totalTime + " Min(s)";
         tr.appendChild(th0);
         tr.appendChild(td1);
