@@ -234,11 +234,19 @@ const showAttendance = (participantsObj) => {
             if(durationPercent === 0){
                 durationPercent = 1;
             }
-            console.log("start Time: " + startMins, "Joined Time: " + joinMins, "joined after: " +  offset, "percentage: " + joinPercent, "duration percentage: " + durationPercent );
+            // console.log("start Time: " + startMins, "Joined Time: " + joinMins, "joined after: " +  offset, "percentage: " + joinPercent, "duration percentage: " + durationPercent );
             totalTime += part.durations[j];
 
+            console.log(`Jointime %: ${Math.floor(joinPercent)}, Duration %: ${durationPercent}, Total: ${Math.floor(joinPercent)+ Math.floor(durationPercent)}`);
+            let durationCheck = Math.floor(joinPercent)+ Math.floor(durationPercent);
+            if(durationCheck>100){
+                durationPercent = 100 - Math.floor(joinPercent);
+            }
+
             let attendedHtml = `<div style="position: absolute; left: ${joinPercent}%; height: 100%; width: ${durationPercent}%; background: black;" ></div>`;
-            tempHTML += attendedHtml;
+            if(joinPercent<100){
+                tempHTML += attendedHtml;
+            }
         }
 
         totalTime = Math.round(totalTime / 60);
