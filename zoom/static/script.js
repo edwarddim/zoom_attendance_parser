@@ -122,7 +122,7 @@ const getAttendance = ()=>{
 
 let zoomData = {"page_count":1,"page_size":30,"total_records":9,"next_page_token":"","participants":[{"id":"UaNQgyQYSM-qKsOyfaDzGQ","user_id":"16778240","name":"fake_user_2","user_email":"fake_user_2@email.com","join_time":"2023-01-27T18:47:28Z","leave_time":"2023-01-27T18:47:58Z","duration":30,"attentiveness_score":"","failover":false,"status":"in_meeting","customer_key":""},{"id":"UaNQgyQYSM-qKsOyfaDzGQ","user_id":"16779264","name":"fake_user_2","user_email":"fake_user_2@email.com","join_time":"2023-01-27T18:47:58Z","leave_time":"2023-01-27T19:32:32Z","duration":2674,"attentiveness_score":"","bo_mtg_id":"C0Vqcg+k7BWzcIf2vU7Phg==","failover":false,"status":"in_meeting","customer_key":""},{"id":"QKSGs6BxSHSZkcM95K1i6A","user_id":"16780288","name":"fake_user_1","user_email":"fake_user_1@email.com","join_time":"2023-01-27T19:32:25Z","leave_time":"2023-01-27T19:33:04Z","duration":39,"attentiveness_score":"","failover":false,"status":"in_meeting","customer_key":""},{"id":"QKSGs6BxSHSZkcM95K1i6A","user_id":"16781312","name":"fake_user_1","user_email":"fake_user_1@email.com","join_time":"2023-01-27T19:33:04Z","leave_time":"2023-01-27T21:17:07Z","duration":6243,"attentiveness_score":"","bo_mtg_id":"B0a5v9OghzRkuFnO2Zjegg==","failover":false,"status":"in_meeting","customer_key":""},{"id":"UaNQgyQYSM-qKsOyfaDzGQ","user_id":"16782336","name":"fake_user_2","user_email":"fake_user_2@email.com","join_time":"2023-01-27T20:05:02Z","leave_time":"2023-01-27T20:05:18Z","duration":16,"attentiveness_score":"","failover":false,"status":"in_meeting","customer_key":""},{"id":"UaNQgyQYSM-qKsOyfaDzGQ","user_id":"16783360","name":"fake_user_2","user_email":"fake_user_2@email.com","join_time":"2023-01-27T20:05:19Z","leave_time":"2023-01-27T21:04:17Z","duration":3538,"attentiveness_score":"","bo_mtg_id":"C0Vqcg+k7BWzcIf2vU7Phg==","failover":false,"status":"in_meeting","customer_key":""},{"id":"AJ9PgIk8RKmF69AbEvJAjQ","user_id":"16784384","name":"fake_user_3","user_email":"","join_time":"2023-01-27T21:08:28Z","leave_time":"2023-01-27T21:08:38Z","duration":10,"attentiveness_score":"","failover":false,"status":"in_meeting","customer_key":""},{"id":"","user_id":"16785408","name":"fake_user_3","user_email":"","join_time":"2023-01-27T21:08:39Z","leave_time":"2023-01-27T21:09:05Z","duration":26,"attentiveness_score":"","bo_mtg_id":"B0a5v9OghzRkuFnO2Zjegg==","failover":false,"status":"in_meeting","customer_key":""},{"id":"AJ9PgIk8RKmF69AbEvJAjQ","user_id":"16786432","name":"fake_user_3","user_email":"","join_time":"2023-01-27T21:09:05Z","leave_time":"2023-01-27T21:09:07Z","duration":2,"attentiveness_score":"","failover":false,"status":"in_meeting","customer_key":""}]}
 
-console.log(zoomData);
+// console.log(zoomData);
 
 // flattenParticipatents takes a zoom data response.
 // take the returned zoom data and removes duplicates so that you have 
@@ -138,6 +138,7 @@ console.log(zoomData);
 // returns an object with the attendee id as the key and the fields shown above
 const flattenParticipants = (zObj) => {
     let attendees = {};
+    let attArr = [];
     zObj.participants.forEach(attendee => {
         if(!attendees.hasOwnProperty(attendee.id)){
             attendees[attendee.id] = {
@@ -153,7 +154,17 @@ const flattenParticipants = (zObj) => {
         }
     });
     // console.log(attendees);
-    return attendees;
+
+    for (const att in attendees){
+        
+        attArr.push(attendees[att]);
+    }
+
+    console.log(attArr);
+    attArr.sort((a,b) => a.name.localeCompare(b.name));
+    console.log(attArr);
+
+    return attArr;
 }
 
 // Clean data obj is designed to check if there are any entries in the zoom obj
@@ -196,7 +207,9 @@ const convertToMST = (dateObj) => {
     return mstDate;
 }
 
-const showAttendance = (participantsObj) => {
+
+// updated to accept a sorted array
+const showAttendance = (participantsArr) => {
     // Variables 
     let i = 1 // record number
     // let startTime = new Date();
@@ -208,14 +221,17 @@ const showAttendance = (participantsObj) => {
     // create HTML elements
     tableBody.innerHTML = '<tr><td class="col-1"></td><td class="col-2"></td><td id="time-legend" class="col-8"></td><td class="col-1"></td></tr>';
     
-    for (const participant in participantsObj){
+    for (const participant in participantsArr){
+        // create document elements
         let tr = document.createElement("tr");
         let th0 = document.createElement("th");
         th0.setAttribute('scope', 'row');
         let td1 = document.createElement('td');
         let td2 = document.createElement('td');
         let td3 = document.createElement('td');
-        let part = participantsObj[participant];
+
+        // extract the individual participant
+        let part = participantsArr[participant];
         let partLen = part.join_times.length;
         let totalTime = 0;
         th0.innerText = i; // set the record number
