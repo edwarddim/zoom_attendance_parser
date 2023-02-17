@@ -18,8 +18,9 @@
 
 <body class="bg-dark text-light">
     <div class="container">
-        <header class="card-header bg-primary">
-            <h1>Dojo Zoom Attendance Visualizer</h1>
+        <header class="card-header d-flex justify-content-between align-items-center">
+            <h1>Coding Dojo <span class="reverse1 purple">&#9664</span>  Zoom Attendance Visualizer</h1>
+            <a href="/logout" class="btn btn-close-white">Logout</a>
         </header>
 
         <select class="form-control-sm mt-2" id="usersSelect" ></select>
@@ -33,34 +34,34 @@
         
 
         
-        <div class="card d-flex flex-row justify-content-around mb-2 p-2 mt-2">
+        <div id="timeline-form" class="card d-flex flex-row justify-content-around mb-2 p-2 mt-2">
             <div class="form-group d-flex flex-column">
-                <label class="text-dark form-label" for="first-period-start">Algo Start</label>
+                <label class=" form-label" for="first-period-start">Algo Start</label>
                 <input class="form-control-sm" type="time" name="first-period-start" id="first-period-start" min="06:00" max="18:00" value="09:00" >
             </div>
             <div class="form-group d-flex flex-column">
-                <label class="text-dark form-label" for="first-period-end">Algo End</label>
+                <label class=" form-label" for="first-period-end">Algo End</label>
                 <input class="form-control-sm" type="time" name="first-period-end" id="first-period-end" value="09:45">
             </div>
             <div class="form-group d-flex flex-column">
-                <label class="text-dark form-label" for="second-period-start">Lecture Start</label>
+                <label class=" form-label" for="second-period-start">Lecture Start</label>
                 <input class="form-control-sm" type="time" name="second-period-start" id="second-period-start" value="10:00">
             </div>
             <div class="form-group d-flex flex-column">
-                <label class="text-dark form-label" for="second-period-end">Lecture End</label>
+                <label class=" form-label" for="second-period-end">Lecture End</label>
                 <input class="form-control-sm" type="time" name="second-period-end" id="second-period-end" value="10:45">                
             </div>
         
             <div class="form-group d-flex flex-column">
-                <label class="text-dark form-label" for="third-period-start">Afternoon Start</label>
+                <label class=" form-label" for="third-period-start">Afternoon Start</label>
                 <input class="form-control-sm" type="time" name="third-period-start" id="third-period-start" value="14:00">
             </div>
             <div class="form-group d-flex flex-column">
-                <label class="text-dark form-label" for="second-period-start">Lecture End</label>
+                <label class=" form-label" for="second-period-start">Lecture End</label>
                 <input class="form-control-sm" type="time" name="third-period-end" id="third-period-end" value="14:45">
             </div>
             <div class="form-group d-flex flex-column">
-                <label class="text-dark form-label" >update</label>
+                <label class=" form-label" >update</label>
                 <button class="form-control-sm" id="update-button" >Update</button>
             </div>
         </div>

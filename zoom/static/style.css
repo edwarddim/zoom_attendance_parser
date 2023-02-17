@@ -2,10 +2,37 @@
     margin: 0px;
     padding: 0px;
     font-family: 'Poppins', sans-serif;
+
 }
 
 body{
     padding: 50px;
+}
+
+.container{
+    background-color: #121212;
+    padding: 20px;
+}
+
+header{
+    background-color: #121212;
+    color: #e6e6e6;
+    border-bottom: .5px solid grey!important;
+}
+
+.reverse1{
+    display: inline-block;
+    transform: scale(.5) rotate(180deg);
+
+}
+.purple{
+    color: #7591d4;
+}
+
+#timeline-form{
+    color: #e6e6e6;
+    background-color: #303030;
+
 }
 
 .timeline-container{
@@ -14,6 +41,7 @@ body{
     width: 100%;
     height: 50px;
     border: 1px solid black;
+    background-color: #e6e6e6;
 }
 .timeline-legend{
     display: flex;
@@ -41,5 +69,11 @@ th{
 
 #attend-table{
     position: relative;
+    color: #e6e6e6;
+    
+}
+
+#stud-data{
+    background-color: #303030;
 }
 
