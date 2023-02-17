@@ -11,15 +11,18 @@ const getUsers = ()=>{
     
     .then(res=>res.json())
         .then(data=>{
-            console.log('incoming users',data)
-            console.log('thening' , data);
+            //console.log('incoming users',data)
+            //console.log('thening' , data);
             let users = data.users
             users.forEach(user => {
                 //console.log('eaching', user);
-                let option = document.createElement('option')
-                option.value = user.id;
-                option.innerText=`${user.first_name} ${user.last_name}`
-                userlist.append(option)
+                if(user.dept == "Instruction"){
+                    let option = document.createElement('option')
+                    option.value = user.id;
+                    option.innerText=`${user.first_name} ${user.last_name}`
+                    userlist.append(option)
+
+                }
             })
         
         })
@@ -99,9 +102,11 @@ const getAttendance = ()=>{
     elem.innerHTML = "";
     let records = 0
     attendance = []
-    //console.log('Some day....',meeting);
+    let preEncode = occurrenceslist.value
+    let encodedId = preEncode.replace('/','%252F')
+    //console.log('encoded?',preEncode,encodedId);
     //{page_count: 1, page_size: 300, total_records: 155, next_page_token: '', participants: Array(155)}
-    fetch("http://localhost:8000/part/"+occurrenceslist.value,{method:'POST'})
+    fetch("http://localhost:8000/part/"+encodedId,{method:'POST'})
     .then(res=>res.json())
     .then(res=>{
         //console.log('parts????',res)
@@ -187,7 +192,7 @@ const convertToMST = (dateObj) => {
     let date = new Date(dateObj);
     // console.log(date);
     let mstDate = date.toLocaleString('en-US', {timeZone: 'America/Denver'})
-    console.log(mstDate);
+    //console.log(mstDate);
     return mstDate;
 }
 
@@ -216,17 +221,17 @@ const showAttendance = (participantsObj) => {
         th0.innerText = i; // set the record number
         td1.innerText = part.name; // set the name 
         let tempHTML = "";
-        console.log(part);
+        //console.log(part);
         let userOffSet = new Date().getTimezoneOffset()/60
         for(let j = 0; j<partLen; j++ ){
             let joinTime = part.join_times[j];
             let jt = new Date(joinTime);
-            console.log('jt ', jt)
+            //console.log('jt ', jt)
             let st = new Date(jt);
             st.setHours(6 + 7-userOffSet);
             st.setMinutes(0);
             st.setSeconds(0);
-            console.log('st ', st)
+            //console.log('st ', st)
             
             let startMins = st.getTime()/60000;
             let joinMins = jt.getTime()/60000;
@@ -239,7 +244,7 @@ const showAttendance = (participantsObj) => {
             // console.log("start Time: " + startMins, "Joined Time: " + joinMins, "joined after: " +  offset, "percentage: " + joinPercent, "duration percentage: " + durationPercent );
             totalTime += part.durations[j];
 
-            console.log(`Jointime %: ${Math.floor(joinPercent)}, Duration %: ${durationPercent}, Total: ${Math.floor(joinPercent)+ Math.floor(durationPercent)}`);
+            //console.log(`Jointime %: ${Math.floor(joinPercent)}, Duration %: ${durationPercent}, Total: ${Math.floor(joinPercent)+ Math.floor(durationPercent)}`);
             let durationCheck = Math.floor(joinPercent)+ Math.floor(durationPercent);
             if(durationCheck>100){
                 durationPercent = 100 - Math.floor(joinPercent);
@@ -266,7 +271,7 @@ const showAttendance = (participantsObj) => {
 
     }
 
-    console.log(participantsObj);
+    //console.log(participantsObj);
 }
 
 //cleanDataObj(zoomData);
