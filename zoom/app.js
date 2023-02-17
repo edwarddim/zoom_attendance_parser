@@ -25,7 +25,15 @@ app.get('/', (req,res)=>{
 app.get('/page', (req,res)=>{
     if(!req.session['authorized']){
         res.redirect('/')
-    }else {res.render('attendance')}
+    }else { 
+        if(checkRefresh(req)){
+            //console.log('about to render',req.session)
+            res.render('attendance')
+        }else{
+            req.session['authorized'] = false;
+            res.redirect('/')
+        }
+    }
 })
 
 //single endpoint for Oauth Requests
@@ -56,6 +64,7 @@ app.get('/success', async (req,res)=>{
             req.session['authorized'] = true;
             req.session['access_token'] = res.data.access_token
             req.session['refresh_token'] = res.data.refresh_token
+            req.session['refresh'] = new Date().getTime()+1800000
             req.session['expires'] = new Date().getTime()+3599000
             //console.log(req.session['expires'])
         }).catch(err =>{
@@ -66,7 +75,60 @@ app.get('/success', async (req,res)=>{
         res.redirect('/page');
 })
 
+
+const  checkRefresh = async (req) => {
+    //console.log(req.session['expires'], new Date().getTime())
+    let now = new Date().getTime()
+    if(req.session['expires'] < now){
+        return false
+    }else if(req.session['refresh'] < now){
+        //console.log('checking refresh',req.session)
+        //console.log('after refresh', req.session)
+        res = await refreshToken(req, now)
+        return res
+    }else{
+        return true
+    }
+}
+
+const refreshToken = async (req,now) => {
+    var config ={
+        method: 'post',
+        url: 'https://zoom.us/oauth/token',
+        headers:{
+            //"Basic " plus Base64-encoded clientID:clientSECRET from https://www.base64encode.org/
+            'Authorization' :'Basic ' + 'dFB2djVtNG9RTEtaVkp5OXhHbHgyQTp1Z3YyQnV0YkhrdjJ5ZHBxN1YydGlIUFB0NHhDblJ5OA==',
+            'content-type' : 'application/x-www-form-urlencoded'
+        },
+        data:{
+            "grant_type": "refresh_token",
+            "refresh_token": req.session['refresh_token'],
+        }
+    }
+
+    var result = await axios(config)
+        .then(res =>{
+            //console.log('res',res.data, req.session)
+            req.session['access_token'] = res.data.access_token
+            req.session['refresh_token'] = res.data.refresh_token
+            req.session['refresh'] = now +1800000
+            req.session['expires'] = now +3599000
+            return true
+        }).catch(err =>{
+            console.log('error',err);
+            req.session['authorized'] = false;
+            return false
+        })
+}
+
 app.post('/users', async (req,res)=>{
+
+    if(!checkRefresh(req)){
+        req.session.authorized = false;
+        res.json({'error':'authenticate'})
+        return
+    }
+
     var config ={
         method: 'get',
         url: 'https://zoom.us/v2/users?page_size=300',
@@ -99,7 +161,12 @@ app.post('/users', async (req,res)=>{
 })
 //get list of meetings for a user
 app.post('/meetings/:userId', async (req,res)=>{
-    console.log('resquesting meetings for userId',req.params.userId)
+    //console.log('resquesting meetings for userId',req.params.userId)
+    if(!checkRefresh(req)){
+        req.session.authorized = false;
+        res.json({'error':'authenticate'})
+        return
+    }
     var config ={
         method: 'get',
         url: 'https://zoom.us/v2/users/'+req.params.userId+'/meetings?page_size=300',
@@ -124,7 +191,12 @@ app.post('/meetings/:userId', async (req,res)=>{
 
 //get details of a specific meeting
 app.post('/meeting/:meetingId', async (req,res)=>{
-    console.log('resquesting meeting details',req.params.meetingId)
+    //console.log('resquesting meeting details',req.params.meetingId)
+    if(!checkRefresh(req)){
+        req.session.authorized = false;
+        res.json({'error':'authenticate'})
+        return
+    }
     var config ={
         method: 'get',
         url: 'https://zoom.us/v2/past_meetings/'+req.params.meetingId+'/instances?page_size=300',
@@ -149,7 +221,12 @@ app.post('/meeting/:meetingId', async (req,res)=>{
 //fetch participants list
 
 app.post('/part/:meetingId', async (req,res)=>{
-    console.log('parts id',req.params.meetingId);
+    if(!checkRefresh(req)){
+        req.session.authorized = false;
+        res.json({'error':'authenticate'})
+        return
+    }
+    //console.log('parts id',req.params.meetingId);
     var config ={
         method: 'get',
         url: `https://zoom.us/v2/report/meetings/${req.params.meetingId}/participants?page_size=300`,
