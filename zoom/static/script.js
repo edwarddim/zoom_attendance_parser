@@ -274,7 +274,20 @@ const showAttendance = (participantsObj) => {
     //console.log(participantsObj);
 }
 
-//cleanDataObj(zoomData);
-//let parList = flattenParticipants(zoomData);
 
-//showAttendance(parList);
+// add markers to the time line for when students should be in class
+let updateBtn = document.getElementById("update-button");
+
+const addMarkers = (event) => {
+    let p1s = null;
+    let p1e = null;
+    let p2s = null;
+    let p2e = null;
+    let p3s = null;
+    let p3e = null;
+    event.preventDefault();
+    console.log(event);
+    console.log("Fun with events");
+}
+
+updateBtn.addEventListener('click', addMarkers);
