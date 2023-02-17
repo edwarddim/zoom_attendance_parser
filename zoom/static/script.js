@@ -206,7 +206,7 @@ const showAttendance = (participantsObj) => {
     //console.log(startTime.getHours());
     let tableBody = document.getElementById("table-body");
     // create HTML elements
-    
+    tableBody.innerHTML = '<tr><td class="col-1"></td><td class="col-2"></td><td id="time-legend" class="col-8"></td><td class="col-1"></td></tr>';
     
     for (const participant in participantsObj){
         let tr = document.createElement("tr");
@@ -279,15 +279,56 @@ const showAttendance = (participantsObj) => {
 let updateBtn = document.getElementById("update-button");
 
 const addMarkers = (event) => {
-    let p1s = null;
-    let p1e = null;
-    let p2s = null;
-    let p2e = null;
-    let p3s = null;
-    let p3e = null;
     event.preventDefault();
-    console.log(event);
-    console.log("Fun with events");
+    // add a date so we can count ms just basing everything at start for lower numbers
+    const refDate = "1970-01-01T";
+    const dayStart = new Date("1970-01-01T06:00");
+
+    const p1s = (document.getElementById("first-period-start").value ? new Date(refDate + document.getElementById("first-period-start").value) : null);
+    const p1e = (document.getElementById("first-period-end").value ? new Date(refDate + document.getElementById("first-period-end").value) : null);
+    const p2s = (document.getElementById("second-period-start").value ? new Date(refDate + document.getElementById("second-period-start").value) : null);
+    const p2e = (document.getElementById("second-period-end").value ? new Date(refDate + document.getElementById("second-period-end").value) : null);
+    const p3s = (document.getElementById("third-period-start").value ? new Date(refDate + document.getElementById("third-period-start").value) : null);
+    const p3e = (document.getElementById("third-period-end").value ? new Date(refDate + document.getElementById("third-period-end").value) : null);
+    
+    // check to make sure no shannagens are going on from the form
+    if(!p1s || !p1e || !p2s || !p2e || !p3s || !p3e){
+        return false;
+    }
+
+    // calculate the start times and widths of the blocks
+    const fpPer = (((p1s - dayStart) / 60000) / 720) * 100;
+    const fwPer = (((p1e - p1s)/60000)/720) * 100;
+    const spPer = (((p2s - dayStart) / 60000) / 720) * 100;
+    const swPer = (((p2e - p2s)/60000)/720) * 100;
+    const tpPer = (((p3s - dayStart) / 60000) / 720) * 100;
+    const twPer = (((p3e - p3s)/60000)/720) * 100;
+    
+    // get the length of the table
+    const tabelLimit = 30;
+    const tableHeight = document.getElementById('attend-table').offsetHeight;
+    const windowHeight = window.innerHeight;
+    const timeline = document.getElementById('time-legend');
+    let lineLength = 0;
+
+    // generate the html blocks
+    let firstBlock = `<div class="fp" style="z-index:10; border: 2px solid blue; height: ${tableHeight-tabelLimit}px; width: ${fwPer}%; display:inline-block; position: absolute; top: 0px; left: ${fpPer}%;" ></div>`;
+    let secondBlock = `<div class="fp" style="z-index:10; border: 2px solid green; height: ${tableHeight-tabelLimit}px; width: ${swPer}%; display:inline-block; position: absolute; top: 0px; left: ${spPer}%;" ></div>`;
+    let thridBlock = `<div class="fp" style="z-index:10; border: 2px solid purple; height: ${tableHeight-tabelLimit}px; width: ${twPer}%; display:inline-block; position: absolute; top: 0px; left: ${tpPer}%;" ></div>`;
+
+    // clear the time on update
+    let timelines = document.querySelectorAll("#time-legend");
+    timelines.forEach(timeline => {
+        // remove previous boxes
+        let boxes = document.querySelectorAll(".fp");
+        boxes.forEach(box => {
+            let tempParent = box.parentElement;
+            tempParent.removeChild(box);
+        });
+    });
+
+    // draw the boxes to the screen
+    timeline.innerHTML = firstBlock + secondBlock + thridBlock;
 }
 
 updateBtn.addEventListener('click', addMarkers);
