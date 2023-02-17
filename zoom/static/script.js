@@ -95,6 +95,9 @@ const processRecord = (record)=>{
     return elem 
 }
 
+
+// move this inside get attendance
+// and change this to be an array! because that is what is being created now!
 let attendanceObj ={}
 
 const getAttendance = ()=>{
