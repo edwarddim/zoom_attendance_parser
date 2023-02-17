@@ -260,6 +260,11 @@ app.post('/part/:meetingId', async (req,res)=>{
     })
 })
 
+
+app.get('/logout', (req,res)=>{
+    req.session.destroy()
+    res.redirect('/')
+})
 // app.post('/part', async (req,res)=>{
 //     var config ={
 //         method: 'get',
