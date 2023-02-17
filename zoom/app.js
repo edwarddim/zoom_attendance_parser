@@ -18,16 +18,14 @@ app.use(express.static('static'))
 app.get('/', (req,res)=>{
     if(req.session['authorized']){
         res.redirect('/page')
-    }
-    res.render('authorize')
+    }else {res.render('authorize')}
+    
 })
 
 app.get('/page', (req,res)=>{
     if(!req.session['authorized']){
         res.redirect('/')
-    }
-
-    res.render('attendance')
+    }else {res.render('attendance')}
 })
 
 //single endpoint for Oauth Requests
