@@ -106,7 +106,7 @@ const getAttendance = ()=>{
     let records = 0
     attendance = []
     let preEncode = occurrenceslist.value
-    let encodedId = preEncode.replace('/','%252F')
+    let encodedId = encodeURIComponent(encodeURIComponent(preEncode))
     //console.log('encoded?',preEncode,encodedId);
     //{page_count: 1, page_size: 300, total_records: 155, next_page_token: '', participants: Array(155)}
     fetch("http://localhost:8000/part/"+encodedId,{method:'POST'})
