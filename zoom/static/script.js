@@ -11,9 +11,10 @@ const getUsers = ()=>{
     
     .then(res=>res.json())
         .then(data=>{
-            //console.log('incoming users',data)
+            //console.log('incoming users',data.users)
             //console.log('thening' , data);
-            let users = data.users
+            let users = data.users.sort((a,b) => (a.first_name > b.first_name) ? 1 : ((b.first_name > a.first_name) ? -1 : 0))
+            //console.log('users:',users)
             users.forEach(user => {
                 //console.log('eaching', user);
                 if(user.dept == "Instruction"){
