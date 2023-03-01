@@ -54,7 +54,7 @@ const getMeetings = ()=>{
     fetch('http://localhost:8000/meetings/'+userlist.value,{method:"POST"})
     .then((res)=>res.json())
     .then(res=>{
-        console.log('meetings:', res.meetings)
+        //console.log('meetings:', res.meetings)
         let meetings = res.meetings.sort(((a,b) => (a.topic > b.topic) ? 1 : ((b.topic > a.topic) ? -1 : 0)))
         meetings.forEach(meeting => {
             meetingsList.append(addMeetingElem(meeting))
@@ -82,8 +82,9 @@ const getMeeting = ()=>{
     
     .then((res)=>res.json())
     .then(res=>{
-        //console.log('got meeting',res)
-        res.occurrences.forEach(meeting => {
+        //console.log('got meeting',res.occurrences)
+        let occurrences = res.occurrences.sort((a,b) => (a.start_time < b.start_time) ? 1 : ((b.start_time < a.start_time) ? -1 : 0))
+        occurrences.forEach(meeting => {
             occurrenceslist.append(addOccurrenceElem(meeting))
         });
     })
@@ -166,9 +167,9 @@ const flattenParticipants = (zObj) => {
         attArr.push(attendees[att]);
     }
 
-    console.log(attArr);
+    //console.log(attArr);
     attArr.sort((a,b) => a.name.localeCompare(b.name));
-    console.log(attArr);
+    //console.log(attArr);
 
     return attArr;
 }
