@@ -54,7 +54,9 @@ const getMeetings = ()=>{
     fetch('http://localhost:8000/meetings/'+userlist.value,{method:"POST"})
     .then((res)=>res.json())
     .then(res=>{
-        res.meetings.forEach(meeting => {
+        console.log('meetings:', res.meetings)
+        let meetings = res.meetings.sort(((a,b) => (a.topic > b.topic) ? 1 : ((b.topic > a.topic) ? -1 : 0)))
+        meetings.forEach(meeting => {
             meetingsList.append(addMeetingElem(meeting))
         });
     })
