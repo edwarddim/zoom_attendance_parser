@@ -1,16 +1,84 @@
-# Welcome to the Dojo Zoom Attendance Visualizer!
+# Coding Dojo Zoom Attendance Parser
 
-- This application is a simple tool that allows you to easily view and analyze attendance records for your Zoom meetings. The app is built using HTML, CSS, JavaScript, and Bootstrap, and it ingests a .csv file containing the attendance records for a Zoom meeting.
+Welcome to the Coding Dojo Zoom Attendance Parser, a web application that allows you to retrieve and visualize attendance records from Zoom meetings. This application uses OAuth to authenticate users with Zoom and provides a backend API built with Express, and a front-end user interface using vanilla JavaScript. This is version 1.0 of the application and it is still in beta, so please use it with caution and report any issues you encounter.
 
-- To install simpy open the html file using your brower of choice, or through VScode using live server.
+## Features
 
-- To use the app, simply upload your .csv file of attendance records to the designated input field on the website. The app will then automatically parse and display the data in a graphical format, making it easy to quickly view and understand attendance patterns for your meetings.
+The Coding Dojo Zoom Attendance Parser includes the following features:
 
-- (COMING SOON) The app also includes several built-in features to help you further analyze your attendance data, such as filtering and sorting options, as well as the ability to download the data in .csv format.
+- User authentication with Zoom OAuth
+- Retrieval of attendance records from Zoom meetings via Zoom's API
+- Visualization of attendance data in a user-friendly interface
+- Support for multiple Zoom accounts
 
-To use this app, you need to have a .csv file from zoom which contains the attendance records.
-You should also make sure that you have a modern web browser installed on your device, as the app is designed to work best on up-to-date browsers.
-Thank you for using the Zoom Attendance Web Application!
+## Installation
+
+To install and run the Coding Dojo Zoom Attendance Parser on your local machine, follow these steps:
+
+1. Clone the repository to your local machine:
+
+    
+    `git clone https://github.com/SR-Coder/Attandance_parser.git`
+
+1. Navigate to the project directory:
+
+    `cd Attendance_parser/zoom`
+
+1. Install the dependencies:
+
+    `npm install`
 
 
-## Please let me know if you have any questions or feedback.
+1. Start the server:
+
+    `nodemon app.js`
+
+    or
+
+    `npm start`
+
+
+1. Open your web browser and navigate to `http://localhost:8000`.
+
+## Usage
+
+To use the Coding Dojo Zoom Attendance Parser, follow these steps:
+
+1. Log in using your Zoom account credentials.
+
+1. Click the "Connect to Zoom" button to connect your Zoom account to the application.
+
+1. Once connected, select an Instructor from the first drop down and click 'Get Meetings' to get a list of meetings associated with that instructor.
+
+1. Select the meeting name and click "Get Occurances" to retrive a list of dates and times that the meeting was held.
+
+1. Select an occurance and click "Get Attendance" to display the attendance.  
+
+1. The attendance records will be displayed in a table on the screen.
+
+1. To log out, click the "Logout" button.
+
+## Known Issues
+
+- This is a beta release, so there may be some bugs or issues. If you encounter any problems, please report them to the development team.
+- Currently Tyler T. C# class is not working correctly
+
+## Contributing
+
+If you would like to contribute to the development of the Coding Dojo Zoom Attendance Parser, please follow these guidelines:
+
+1. Fork the repository to your own GitHub account.
+
+2. Clone your forked repository to your local machine.
+
+3. Create a new branch for your changes.
+
+4. Make your changes and test them locally.
+
+5. Push your changes to your forked repository.
+
+6. Submit a pull request to the original repository with a detailed description of your changes.
+
+## License
+
+The Coding Dojo Zoom Attendance Parser is licensed under the MIT License. See the `LICENSE` file for more information.
