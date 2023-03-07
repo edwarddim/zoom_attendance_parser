@@ -147,17 +147,17 @@ const flattenParticipants = (zObj) => {
     let attendees = {};
     let attArr = [];
     zObj.participants.forEach(attendee => {
-        if(!attendees.hasOwnProperty(attendee.id)){
-            attendees[attendee.id] = {
+        if(!attendees.hasOwnProperty(attendee.user_id)){
+            attendees[attendee.user_id] = {
                 "name":attendee.name,
                 "join_times":[attendee.join_time],
                 "leave_times":[attendee.leave_time],
                 "durations":[attendee.duration]
             }
         } else {
-            attendees[attendee.id].join_times.push(attendee.join_time);
-            attendees[attendee.id].leave_times.push(attendee.leave_time);
-            attendees[attendee.id].durations.push(attendee.duration);
+            attendees[attendee.user_id].join_times.push(attendee.join_time);
+            attendees[attendee.user_id].leave_times.push(attendee.leave_time);
+            attendees[attendee.user_id].durations.push(attendee.duration);
         }
     });
     // console.log(attendees);
@@ -179,7 +179,7 @@ const flattenParticipants = (zObj) => {
 const cleanDataObj = (zObj) =>{
     let tempid = '1000000000000000000000'
     zObj.participants.forEach(entry => {
-        if(entry.id === ""){
+        if(entry.user_id === ""){
             //console.log('found blank', entry.name);
             let name = entry.name;
             
@@ -193,7 +193,7 @@ const cleanDataObj = (zObj) =>{
           
         }
     });
-     //console.log(zObj);
+     console.log(zObj);
 }
 
 // this function take an attendee object returned by the flaten function
