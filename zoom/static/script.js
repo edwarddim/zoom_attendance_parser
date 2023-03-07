@@ -1,229 +1,186 @@
-//console.log('loaded script')
+/*
+    Attendance parser for Coding Dojo, but Chris Thompson
+    and Jim Reeder v.1.0
+*/
 
 let userlist = document.getElementById('usersSelect')
 let meetingslist = document.getElementById('meetingsList')
 let occurrenceslist = document.getElementById('occurrencesList')
-//let attendanceslist = document.getElementById('attendancesList')
 
+// *******************************************************************************************
+// START BACKEND CALLS
+
+// GET USERS
+// Gets the users from zoom so that we can look at their meetings
 const getUsers = ()=>{
-    //console.log('prefetch');
     fetch('http://localhost:8000/users',{method:'POST'})
     
     .then(res=>res.json())
         .then(data=>{
-            //console.log('incoming users',data.users)
-            //console.log('thening' , data);
             let users = data.users.sort((a,b) => (a.first_name > b.first_name) ? 1 : ((b.first_name > a.first_name) ? -1 : 0))
-            //console.log('users:',users)
             users.forEach(user => {
-                //console.log('eaching', user);
                 if(user.dept == "Instruction"){
                     let option = document.createElement('option')
                     option.value = user.id;
                     option.innerText=`${user.first_name} ${user.last_name}`
                     userlist.append(option)
-
                 }
             })
-        
         })
     .catch(err=>{
         console.log(err)
     })
-
 }
 
 getUsers()
 
 
-// GET MEETINGS
+// Add meeting element is used in getMeetings() to add options to the list
 // create meeting html
-
 const addMeetingElem =(meeting)=>{
     let elem = document.createElement('option')
     elem.value = meeting.id
     elem.innerText = `${meeting.topic}`
-    
     return elem 
 }
 
+//Get Meetings makes the request to the back end to get the meetings for the 
+// drop down list
 const getMeetings = ()=>{
-    meetingsList.innerHTML = '';
+    meetingslist.innerHTML = '';
     occurrenceslist.innerHTML = '';
-   // console.log('getting meetings for ', userlist.options[userlist.selectedIndex].text, userlist.value )
     fetch('http://localhost:8000/meetings/'+userlist.value,{method:"POST"})
     .then((res)=>res.json())
     .then(res=>{
-        //console.log('meetings:', res.meetings)
         let meetings = res.meetings.sort(((a,b) => (a.topic > b.topic) ? 1 : ((b.topic > a.topic) ? -1 : 0)))
         meetings.forEach(meeting => {
-            meetingsList.append(addMeetingElem(meeting))
+            meetingslist.append(addMeetingElem(meeting))
         });
     })
 }
 
-//GET MEETING
-
+// Add Occurances
+// Creates options for the occurances list, used in Get Meeting below
 const addOccurrenceElem = (meeting)=>{
     let elem = document.createElement('option')
     elem.value = meeting.uuid
     elem.innerText = `${meeting.start_time}`
-    
     return elem 
 }
 
-let occurrences = [];
+// GET MEETING occurances
+// Returns a list of occurances from the back end and displays them in the
+// occurances select
 const getMeeting = ()=>{
     occurrenceslist.innerHTML = '';
-    
-    //console.log('getting meeting', )
     fetch('http://localhost:8000/meeting/'+meetingslist.value,{method:"POST"})
-
-    
-    .then((res)=>res.json())
-    .then(res=>{
-        //console.log('got meeting',res.occurrences)
-        let occurrences = res.occurrences.sort((a,b) => (a.start_time < b.start_time) ? 1 : ((b.start_time < a.start_time) ? -1 : 0))
-        occurrences.forEach(meeting => {
-            occurrenceslist.append(addOccurrenceElem(meeting))
-        });
+        .then((res)=>res.json())
+        .then(res=>{
+            let occurrences = res.occurrences.sort((a,b) => (a.start_time < b.start_time) ? 1 : ((b.start_time < a.start_time) ? -1 : 0))
+            occurrences.forEach(meeting => {
+                occurrenceslist.append(addOccurrenceElem(meeting))
+            });
     })
 }
 
-//GET ATTENDANCE
+// END BACK END CALLS
+// *******************************************************************************************
+// *******************************************************************************************
+// START FRONT END UPDATING
 
-const processRecord = (record)=>{
-    let elem = document.createElement('div')
-    elem.innerHTML = `<h2>${record.name}</h2><h3>${record.user_email}</h3> <h4>Login: ${record.join_time} - Logout: ${record.leave_time}</h4>`
-    elem.classList.add("card")
-    return elem 
-}
-
-
-// move this inside get attendance
-// and change this to be an array! because that is what is being created now!
-let attendanceObj ={}
-
-const getAttendance = ()=>{
+/* GET ATTENDANCE
+    This is the main entry point for showing the attendance
+    once a meeting has been selected this function is called by the "Get Attendance btn"
+    it then retrieves the attendance object from zoom and processes it and finally displays it
+*/ 
+const getAttendance = async ()=>{
     const elem = document.getElementById('table-body');
     elem.innerHTML = "";
-    let records = 0
-    attendance = []
     let preEncode = occurrenceslist.value
     let encodedId = encodeURIComponent(encodeURIComponent(preEncode))
-    //console.log('encoded?',preEncode,encodedId);
-    //{page_count: 1, page_size: 300, total_records: 155, next_page_token: '', participants: Array(155)}
-    fetch("http://localhost:8000/part/"+encodedId,{method:'POST'})
-    .then(res=>res.json())
-    .then(res=>{
-        //console.log('parts????',res)
-        attendanceObj = res
-            cleanDataObj(attendanceObj)
-            attendanceObj = flattenParticipants(attendanceObj)
-            showAttendance(attendanceObj)
-        })
-        
-        
-    
+    const attendanceRes = await fetch("http://localhost:8000/part/"+encodedId,{method:'POST'});// fetch from the back end
+    const attendanceJson = await attendanceRes.json(); // conver the response into json
+    const attendeesWithId = await addHashedIdsToAttendees(attendanceJson); // Add unique ID's
+    const hashedIdToAttendee = mergeJoinTimes(attendeesWithId); // Merge all the records 
+    const attendees = Object.values(hashedIdToAttendee); // Convert to an Array
+    attendees.sort((a,b) => a.name.localeCompare(b.name)); // sort the records
+    showAttendance(attendees); // display the records
 }
 
-// let zoomData = {"page_count":1,"page_size":30,"total_records":9,"next_page_token":"","participants":[{"id":"UaNQgyQYSM-qKsOyfaDzGQ","user_id":"16778240","name":"fake_user_2","user_email":"fake_user_2@email.com","join_time":"2023-01-27T18:47:28Z","leave_time":"2023-01-27T18:47:58Z","duration":30,"attentiveness_score":"","failover":false,"status":"in_meeting","customer_key":""},{"id":"UaNQgyQYSM-qKsOyfaDzGQ","user_id":"16779264","name":"fake_user_2","user_email":"fake_user_2@email.com","join_time":"2023-01-27T18:47:58Z","leave_time":"2023-01-27T19:32:32Z","duration":2674,"attentiveness_score":"","bo_mtg_id":"C0Vqcg+k7BWzcIf2vU7Phg==","failover":false,"status":"in_meeting","customer_key":""},{"id":"QKSGs6BxSHSZkcM95K1i6A","user_id":"16780288","name":"fake_user_1","user_email":"fake_user_1@email.com","join_time":"2023-01-27T19:32:25Z","leave_time":"2023-01-27T19:33:04Z","duration":39,"attentiveness_score":"","failover":false,"status":"in_meeting","customer_key":""},{"id":"QKSGs6BxSHSZkcM95K1i6A","user_id":"16781312","name":"fake_user_1","user_email":"fake_user_1@email.com","join_time":"2023-01-27T19:33:04Z","leave_time":"2023-01-27T21:17:07Z","duration":6243,"attentiveness_score":"","bo_mtg_id":"B0a5v9OghzRkuFnO2Zjegg==","failover":false,"status":"in_meeting","customer_key":""},{"id":"UaNQgyQYSM-qKsOyfaDzGQ","user_id":"16782336","name":"fake_user_2","user_email":"fake_user_2@email.com","join_time":"2023-01-27T20:05:02Z","leave_time":"2023-01-27T20:05:18Z","duration":16,"attentiveness_score":"","failover":false,"status":"in_meeting","customer_key":""},{"id":"UaNQgyQYSM-qKsOyfaDzGQ","user_id":"16783360","name":"fake_user_2","user_email":"fake_user_2@email.com","join_time":"2023-01-27T20:05:19Z","leave_time":"2023-01-27T21:04:17Z","duration":3538,"attentiveness_score":"","bo_mtg_id":"C0Vqcg+k7BWzcIf2vU7Phg==","failover":false,"status":"in_meeting","customer_key":""},{"id":"AJ9PgIk8RKmF69AbEvJAjQ","user_id":"16784384","name":"fake_user_3","user_email":"","join_time":"2023-01-27T21:08:28Z","leave_time":"2023-01-27T21:08:38Z","duration":10,"attentiveness_score":"","failover":false,"status":"in_meeting","customer_key":""},{"id":"","user_id":"16785408","name":"fake_user_3","user_email":"","join_time":"2023-01-27T21:08:39Z","leave_time":"2023-01-27T21:09:05Z","duration":26,"attentiveness_score":"","bo_mtg_id":"B0a5v9OghzRkuFnO2Zjegg==","failover":false,"status":"in_meeting","customer_key":""},{"id":"AJ9PgIk8RKmF69AbEvJAjQ","user_id":"16786432","name":"fake_user_3","user_email":"","join_time":"2023-01-27T21:09:05Z","leave_time":"2023-01-27T21:09:07Z","duration":2,"attentiveness_score":"","failover":false,"status":"in_meeting","customer_key":""}]}
+// HASHES USER NAME INTO UNIQUE ID USED IN addHashedIdsToAttendees
+async function sha256(message){
+    const msgBuffer = new TextEncoder().encode(message);                     
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);     
+    const hashArray = Array.from(new Uint8Array(hashBuffer));                
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashHex;
+}
 
-// console.log(zoomData);
-
-// flattenParticipatents takes a zoom data response.
-// take the returned zoom data and removes duplicates so that you have 
-// one entry for each unique vistor with an array of join times and leaves times
-// attendees = {
-//     "asdfeaewasdfa":{
-//         "name":"Attendee name"
-//         "join_times":[],
-//         "leave_times":[],
-//         'durations':[]
-//     },
-// }
-// returns an object with the attendee id as the key and the fields shown above
-const flattenParticipants = (zObj) => {
-    let attendees = {};
-    let attArr = [];
-    zObj.participants.forEach(attendee => {
-        if(!attendees.hasOwnProperty(attendee.user_id)){
-            attendees[attendee.user_id] = {
-                "name":attendee.name,
-                "join_times":[attendee.join_time],
-                "leave_times":[attendee.leave_time],
-                "durations":[attendee.duration]
-            }
-        } else {
-            attendees[attendee.user_id].join_times.push(attendee.join_time);
-            attendees[attendee.user_id].leave_times.push(attendee.leave_time);
-            attendees[attendee.user_id].durations.push(attendee.duration);
+// Adds a unique ID to each record
+const addHashedIdsToAttendees = async (zObj) => {
+    const mappedAttendeePromises = zObj.participants.map(async (attendee) => {
+        const hash = await sha256(attendee.name);
+        return {
+            ...attendee,
+            hashedId: hash
         }
     });
-    // console.log(attendees);
 
-    for (const att in attendees){
-        
-        attArr.push(attendees[att]);
+    const mappedAttendees = await Promise.all(mappedAttendeePromises);
+    return mappedAttendees;
+}
+
+// Joins all records with the same id
+const mergeJoinTimes = (attendeesWithId) => {
+    const table = {};
+
+    for (const attendee of attendeesWithId) {
+        const { hashedId, name, duration, join_time, leave_time} = attendee;
+
+        if (table.hasOwnProperty(hashedId) === false) {
+            table[hashedId] = {
+                name,
+                join_times: [join_time],
+                leave_times: [leave_time],
+                durations: [duration],
+                times: [
+                    {
+                        join_time,
+                        leave_time,
+                        duration
+                    }
+                ]
+            }
+        }
+        else {
+            const attendeeToUpdate = table[hashedId];
+            attendeeToUpdate.join_times.push(join_time);
+            attendeeToUpdate.leave_times.push(leave_time);
+            attendeeToUpdate.durations.push(duration)
+
+            attendeeToUpdate.times.push({
+                join_time,
+                leave_time,
+                duration
+            })
+        }
     }
 
-    //console.log(attArr);
-    attArr.sort((a,b) => a.name.localeCompare(b.name));
-    //console.log(attArr);
-
-    return attArr;
-}
-
-// Clean data obj is designed to check if there are any entries in the zoom obj
-// that do not have a valid id, 
-const cleanDataObj = (zObj) =>{
-    let tempid = '1000000000000000000000'
-    zObj.participants.forEach(entry => {
-        if(entry.user_id === ""){
-            //console.log('found blank', entry.name);
-            let name = entry.name;
-            
-            for(let i = 0; i < zObj.participants.length; i ++){
-                if(zObj.participants[i].name === name && zObj.participants[i].id && zObj.participants[i].id != '' ){
-                    //console.log('found match', zObj.participants[i].id);
-                    entry.id = zObj.participants[i].id
-                    
-                }
-            }
-          
-        }
-    });
-     console.log(zObj);
-}
-
-// this function take an attendee object returned by the flaten function
-// and creates the html to update the page for the table.  
-// need to convert Z to mst. Zulu time is 7 hours ahead of MST so we will need to
-// subtract 7 hours from the times to put them in MST.
-const displayData = (attendeeObj) => {
-
+    return table;
 }
 
 // This function takes in a datetime object and converts it from Zulu or UTC 
 // to mst mountian time
 const convertToMST = (dateObj) => {
     let date = new Date(dateObj);
-    // console.log(date);
     let mstDate = date.toLocaleString('en-US', {timeZone: 'America/Denver'})
-    //console.log(mstDate);
     return mstDate;
 }
-
 
 // updated to accept a sorted array
 const showAttendance = (participantsArr) => {
     // Variables 
     let i = 1 // record number
-    // let startTime = new Date();
-    // startTime.setHours(6);
-    // startTime.setMinutes(0);
-    // startTime = convertToMST(startTime)
-    //console.log(startTime.getHours());
     let tableBody = document.getElementById("table-body");
     // create HTML elements
     tableBody.innerHTML = '<tr><td class="col-1"></td><td class="col-2"></td><td id="time-legend" class="col-8"></td><td class="col-1"></td></tr>';
@@ -244,17 +201,14 @@ const showAttendance = (participantsArr) => {
         th0.innerText = i; // set the record number
         td1.innerText = part.name; // set the name 
         let tempHTML = "";
-        //console.log(part);
         let userOffSet = new Date().getTimezoneOffset()/60
         for(let j = 0; j<partLen; j++ ){
             let joinTime = part.join_times[j];
             let jt = new Date(joinTime);
-            //console.log('jt ', jt)
             let st = new Date(jt);
             st.setHours(6 + 7-userOffSet);
             st.setMinutes(0);
             st.setSeconds(0);
-            //console.log('st ', st)
             
             let startMins = st.getTime()/60000;
             let joinMins = jt.getTime()/60000;
@@ -264,15 +218,11 @@ const showAttendance = (participantsArr) => {
             if(durationPercent === 0){
                 durationPercent = 1;
             }
-            // console.log("start Time: " + startMins, "Joined Time: " + joinMins, "joined after: " +  offset, "percentage: " + joinPercent, "duration percentage: " + durationPercent );
             totalTime += part.durations[j];
-
-            //console.log(`Jointime %: ${Math.floor(joinPercent)}, Duration %: ${durationPercent}, Total: ${Math.floor(joinPercent)+ Math.floor(durationPercent)}`);
             let durationCheck = Math.floor(joinPercent)+ Math.floor(durationPercent);
             if(durationCheck>100){
                 durationPercent = 100 - Math.floor(joinPercent);
             }
-
             let attendedHtml = `<div style="position: absolute; left: ${joinPercent}%; height: 100%; width: ${durationPercent}%; background: black;" ></div>`;
             if(joinPercent<100){
                 tempHTML += attendedHtml;
@@ -280,23 +230,17 @@ const showAttendance = (participantsArr) => {
         }
 
         totalTime = Math.round(totalTime / 60);
-
         td2.innerHTML = `<div id="${part.name}" class="timeline-container">${tempHTML}</div>`;
         td3.innerText = totalTime + " Min(s)";
         tr.appendChild(th0);
         tr.appendChild(td1);
         tr.appendChild(td2);
         tr.appendChild(td3);
-
         tableBody.appendChild(tr)
-
         i++; // increment record
-
     }
 
-    //console.log(participantsObj);
 }
-
 
 // add markers to the time line for when students should be in class
 let updateBtn = document.getElementById("update-button");
