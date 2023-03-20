@@ -320,7 +320,7 @@ const showJoin = (event)=>{
 }
 
 const hideJoin = (event)=>{
-    console.log('hidejoin triggered')
+    
     document.getElementById('timebox').remove()
 
 }
