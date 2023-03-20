@@ -212,6 +212,7 @@ const showAttendance = (participantsArr) => {
             
             let startMins = st.getTime()/60000;
             let joinMins = jt.getTime()/60000;
+            
             let offset = joinMins-startMins;
             let joinPercent = Math.round((offset/720)*100);
             let durationPercent = Math.round(((part.durations[j]/60)/720)*100);
@@ -223,7 +224,12 @@ const showAttendance = (participantsArr) => {
             if(durationCheck>100){
                 durationPercent = 100 - Math.floor(joinPercent);
             }
-            let attendedHtml = `<div style="position: absolute; left: ${joinPercent}%; height: 100%; width: ${durationPercent}%; background: black;" ></div>`;
+            let displayJoin = new Date(joinTime)
+            let displayLeave = new Date(part.leave_times[j])
+            displayJoin.setHours(displayJoin.getHours() - 7 + userOffSet)
+            displayLeave.setHours(displayLeave.getHours() - 7 + userOffSet)
+            //console.log(displayJoin)
+            let attendedHtml = `<div style="position: absolute; left: ${joinPercent}%; height: 100%; width: ${durationPercent}%; background: black;" onmouseenter="showJoin(event)" onmouseleave="hideJoin(event)" data-joinTime="${displayJoin.getHours()}:${displayJoin.getMinutes()>9?displayJoin.getMinutes():'0'+displayJoin.getMinutes()}" data-leaveTime="${displayLeave.getHours()}:${displayLeave.getMinutes()>9?displayLeave.getMinutes():'0'+displayLeave.getMinutes()}"></div>`;
             if(joinPercent<100){
                 tempHTML += attendedHtml;
             }
@@ -231,6 +237,7 @@ const showAttendance = (participantsArr) => {
 
         totalTime = Math.round(totalTime / 60);
         td2.innerHTML = `<div id="${part.name}" class="timeline-container">${tempHTML}</div>`;
+        
         td3.innerText = totalTime + " Min(s)";
         tr.appendChild(th0);
         tr.appendChild(td1);
@@ -296,6 +303,26 @@ const addMarkers = (event) => {
 
     // draw the boxes to the screen
     timeline.innerHTML = firstBlock + secondBlock + thridBlock;
+}
+
+const showJoin = (event)=>{
+    
+    let timeBox = document.createElement('div')
+    timeBox.id = 'timebox'
+    timeBox.style.setProperty('position', 'absolute')
+    
+    timeBox.innerHTML=`<h1>${event.target.dataset.jointime}</h1><h1>${event.target.dataset.leavetime}</h1>`
+    timeBox.style.border = `2px solid black`
+    document.body.appendChild(timeBox);
+    timeBox.style.top = `${event.clientY - timeBox.offsetHeight}px`;
+    timeBox.style.left = `${event.clientX}px`;
+    timeBox.style.setProperty('z-index', '1021')
+}
+
+const hideJoin = (event)=>{
+    console.log('hidejoin triggered')
+    document.getElementById('timebox').remove()
+
 }
 
 updateBtn.addEventListener('click', addMarkers);
