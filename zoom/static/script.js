@@ -1,5 +1,5 @@
 /*
-    Attendance parser for Coding Dojo, but Chris Thompson
+    Attendance parser for Coding Dojo, by Chris Thompson
     and Jim Reeder v.1.0
 */
 
@@ -306,16 +306,15 @@ const addMarkers = (event) => {
 }
 
 const showJoin = (event)=>{
-    
     let timeBox = document.createElement('div')
     timeBox.id = 'timebox'
     timeBox.style.setProperty('position', 'absolute')
     
-    timeBox.innerHTML=`<h1>${event.target.dataset.jointime}</h1><h1>${event.target.dataset.leavetime}</h1>`
-    timeBox.style.border = `2px solid black`
+    timeBox.innerHTML=`<p>${event.target.dataset.jointime}</p><p>${event.target.dataset.leavetime}</p>`
+    // timeBox.style.border = `2px solid black`
     document.body.appendChild(timeBox);
-    timeBox.style.top = `${event.clientY - timeBox.offsetHeight}px`;
-    timeBox.style.left = `${event.clientX}px`;
+    timeBox.style.top = `${event.pageY - timeBox.offsetHeight - 20}px`;
+    timeBox.style.left = `${event.clientX - (.5*(timeBox.offsetWidth)) }px`;
     timeBox.style.setProperty('z-index', '1021')
 }
 

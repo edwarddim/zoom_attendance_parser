@@ -77,3 +77,36 @@ th{
     background-color: #303030;
 }
 
+#timebox {
+    position: relative;
+    margin: 0 0;
+    padding: 1em;
+    box-sizing: border-box;
+    background-color: whitesmoke;
+    color: #303030;
+    border-radius: 15px;
+    box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+}
+
+
+#timebox::after {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    margin-left: -.5em;
+    bottom: -1em;
+    left: 40%;
+    box-sizing: border-box;
+    border: .05em solid #000;
+    border-color: transparent transparent whitesmoke whitesmoke;
+    background-color: whitesmoke;
+    transform-origin: 0 0;
+    transform: rotate(-45deg);
+    box-shadow: -3px 3px 4px 0 rgba(0,0,0,.08);
+}
+
+#timebox > p {
+    padding: 0px;
+    margin: 0px;
+}
