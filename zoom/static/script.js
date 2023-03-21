@@ -7,6 +7,14 @@ let userlist = document.getElementById('usersSelect')
 let meetingslist = document.getElementById('meetingsList')
 let occurrenceslist = document.getElementById('occurrencesList')
 
+//options to control display of localized date strings
+let timeOptions ={
+    weekday: "short",
+    year: "numeric",
+    month: "short",
+    day: "2-digit"
+}
+
 // *******************************************************************************************
 // START BACKEND CALLS
 
@@ -64,7 +72,7 @@ const getMeetings = ()=>{
 const addOccurrenceElem = (meeting)=>{
     let elem = document.createElement('option')
     elem.value = meeting.uuid
-    elem.innerText = `${meeting.start_time}`
+    elem.innerText = `${meeting.start_time.day}`
     return elem 
 }
 
@@ -78,6 +86,7 @@ const getMeeting = ()=>{
         .then(res=>{
             let occurrences = res.occurrences.sort((a,b) => (a.start_time < b.start_time) ? 1 : ((b.start_time < a.start_time) ? -1 : 0))
             occurrences.forEach(meeting => {
+                meeting.start_time = convertToWorkingTime(new Date(meeting.start_time))
                 occurrenceslist.append(addOccurrenceElem(meeting))
             });
     })
@@ -104,7 +113,47 @@ const getAttendance = async ()=>{
     const hashedIdToAttendee = mergeJoinTimes(attendeesWithId); // Merge all the records 
     const attendees = Object.values(hashedIdToAttendee); // Convert to an Array
     attendees.sort((a,b) => a.name.localeCompare(b.name)); // sort the records
+    attendees.forEach(attendee =>{updateAttendeesTime(attendee)})
     showAttendance(attendees); // display the records
+}
+
+const getMTOffset = () => {
+    dt = new Date();
+    let month = dt.getUTCMonth(); // utc month (jan is 0)
+    let date = dt.getUTCDate(); // utc date
+    let hour = dt.getUTCHours(); // utc hours (midnight is 0)
+    let day = dt.getUTCDay(); // utc weekday (sunday is 0)
+    // assume MST offset
+    let offset = 7;
+    // adjust to MDT offset as needed
+    if ((month > 2 && month < 10) || (month === 2 && date > 14)) {
+      offset = 6;
+    } else if (month === 2 && date > 7 && date < 15) {
+      if ((day && date - day > 7) || (day === 0 && hour - offset >= 2)) {
+        offset = 6;
+      }
+    } else if (month === 10 && date < 8) {
+      if ((day && date - day < 0) || (day === 0 && hour - offset < 1)) {
+        offset = 6;
+      }
+    }
+    return offset;
+  };
+
+const updateAttendeesTime = (attendee) =>{
+    attendee.join_times = attendee.join_times.map(join => convertToWorkingTime(new Date(join)))
+    attendee.leave_times = attendee.leave_times.map(leave => convertToWorkingTime(new Date(leave)))
+}
+
+//date time string => {day:string, hours:int, minutes:int} in MT
+const convertToWorkingTime = (dateTime) =>{
+    let userOffSet = new Date().getTimezoneOffset()/60
+    const workingTime = {
+        day:dateTime.toLocaleString('en',timeOptions),
+        hours:dateTime.getHours() -getMTOffset() + userOffSet,
+        minutes:dateTime.getMinutes()
+    }
+    return workingTime
 }
 
 // HASHES USER NAME INTO UNIQUE ID USED IN addHashedIdsToAttendees
@@ -169,13 +218,13 @@ const mergeJoinTimes = (attendeesWithId) => {
     return table;
 }
 
-// This function takes in a datetime object and converts it from Zulu or UTC 
-// to mst mountian time
-const convertToMST = (dateObj) => {
-    let date = new Date(dateObj);
-    let mstDate = date.toLocaleString('en-US', {timeZone: 'America/Denver'})
-    return mstDate;
-}
+// // This function takes in a datetime object and converts it from Zulu or UTC 
+// // to mst mountian time
+// const convertToMST = (dateObj) => {
+//     let date = new Date(dateObj);
+//     let mstDate = date.toLocaleString('en-US', {timeZone: 'America/Denver'})
+//     return mstDate;
+// }
 
 // updated to accept a sorted array
 const showAttendance = (participantsArr) => {
@@ -204,18 +253,13 @@ const showAttendance = (participantsArr) => {
         let userOffSet = new Date().getTimezoneOffset()/60
         for(let j = 0; j<partLen; j++ ){
             let joinTime = part.join_times[j];
-            let jt = new Date(joinTime);
-            let st = new Date(jt);
-            st.setHours(6 + 7-userOffSet);
-            st.setMinutes(0);
-            st.setSeconds(0);
-            
-            let startMins = st.getTime()/60000;
-            let joinMins = jt.getTime()/60000;
+            let leaveTime = part.leave_times[j];
+            let startMins = 360; //starting 6 am MT [6 * 60]
+            let joinMins = joinTime.hours * 60 + joinTime.minutes;
             
             let offset = joinMins-startMins;
             let joinPercent = Math.round((offset/720)*100);
-            let durationPercent = Math.round(((part.durations[j]/60)/720)*100);
+            let durationPercent = Math.round(((leaveTime.hours - joinTime.hours) * 60 + (leaveTime.minutes - joinTime.minutes ))/720 *100);
             if(durationPercent === 0){
                 durationPercent = 1;
             }
@@ -224,12 +268,9 @@ const showAttendance = (participantsArr) => {
             if(durationCheck>100){
                 durationPercent = 100 - Math.floor(joinPercent);
             }
-            let displayJoin = new Date(joinTime)
-            let displayLeave = new Date(part.leave_times[j])
-            displayJoin.setHours(displayJoin.getHours() - 7 + userOffSet)
-            displayLeave.setHours(displayLeave.getHours() - 7 + userOffSet)
+            
             //console.log(displayJoin)
-            let attendedHtml = `<div style="position: absolute; left: ${joinPercent}%; height: 100%; width: ${durationPercent}%; background: black;" onmouseenter="showJoin(event)" onmouseleave="hideJoin(event)" data-joinTime="${displayJoin.getHours()}:${displayJoin.getMinutes()>9?displayJoin.getMinutes():'0'+displayJoin.getMinutes()}" data-leaveTime="${displayLeave.getHours()}:${displayLeave.getMinutes()>9?displayLeave.getMinutes():'0'+displayLeave.getMinutes()}"></div>`;
+            let attendedHtml = `<div style="position: absolute; left: ${joinPercent}%; height: 100%; width: ${durationPercent}%; background: black;" onmouseenter="showJoin(event)" onmouseleave="hideJoin(event)" data-joinTime="${joinTime.hours}:${joinTime.minutes>9?joinTime.minutes:'0'+joinTime.minutes}" data-leaveTime="${leaveTime.hours}:${leaveTime.minutes>9?leaveTime.minutes:'0'+leaveTime.minutes}"></div>`;
             if(joinPercent<100){
                 tempHTML += attendedHtml;
             }
