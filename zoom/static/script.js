@@ -327,9 +327,9 @@ const addMarkers = (event) => {
     let lineLength = 0;
 
     // generate the html blocks
-    let firstBlock = `<div class="fp" style="z-index:10; border: 2px solid blue; height: ${tableHeight-tabelLimit}px; width: ${fwPer}%; display:inline-block; position: absolute; top: 0px; left: ${fpPer}%;" ></div>`;
-    let secondBlock = `<div class="fp" style="z-index:10; border: 2px solid green; height: ${tableHeight-tabelLimit}px; width: ${swPer}%; display:inline-block; position: absolute; top: 0px; left: ${spPer}%;" ></div>`;
-    let thridBlock = `<div class="fp" style="z-index:10; border: 2px solid purple; height: ${tableHeight-tabelLimit}px; width: ${twPer}%; display:inline-block; position: absolute; top: 0px; left: ${tpPer}%;" ></div>`;
+    let firstBlock = `<div class="fp" style="z-index:10; border: 2px solid blue; height: ${tableHeight-tabelLimit}px; width: ${fwPer}%; display:inline-block; position: absolute; top: 0px; left: ${fpPer}%; pointer-events: none; " ></div>`;
+    let secondBlock = `<div class="fp" style="z-index:10; border: 2px solid green; height: ${tableHeight-tabelLimit}px; width: ${swPer}%; display:inline-block; position: absolute; top: 0px; left: ${spPer}%; pointer-events: none; " ></div>`;
+    let thridBlock = `<div class="fp" style="z-index:10; border: 2px solid purple; height: ${tableHeight-tabelLimit}px; width: ${twPer}%; display:inline-block; position: absolute; top: 0px; left: ${tpPer}%; pointer-events: none; " ></div>`;
 
     // clear the time on update
     let timelines = document.querySelectorAll("#time-legend");
