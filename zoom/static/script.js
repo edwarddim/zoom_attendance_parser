@@ -316,12 +316,19 @@ const showJoin = (event)=>{
     timeBox.style.top = `${event.pageY - timeBox.offsetHeight - 20}px`;
     timeBox.style.left = `${event.clientX - (.5*(timeBox.offsetWidth)) }px`;
     timeBox.style.setProperty('z-index', '1021')
+    event.target.addEventListener('mousemove', updateJoin, event)
 }
 
 const hideJoin = (event)=>{
-    
+    event.target.removeEventListener('mousemove',updateJoin, event)
     document.getElementById('timebox').remove()
 
+}
+
+const updateJoin = (event)=>{
+    let timeBox = document.getElementById('timebox')
+    timeBox.style.top = `${event.pageY - timeBox.offsetHeight - 20}px`;
+    timeBox.style.left = `${event.clientX - (.5*(timeBox.offsetWidth)) }px`;
 }
 
 updateBtn.addEventListener('click', addMarkers);
