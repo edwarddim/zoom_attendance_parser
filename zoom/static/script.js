@@ -228,6 +228,7 @@ const mergeJoinTimes = (attendeesWithId) => {
 
 // updated to accept a sorted array
 const showAttendance = (participantsArr) => {
+    changeTimeline()
     // Variables 
     let i = 1 // record number
     let tableBody = document.getElementById("table-body");
@@ -251,10 +252,11 @@ const showAttendance = (participantsArr) => {
         td1.innerText = part.name; // set the name 
         let tempHTML = "";
         let userOffSet = new Date().getTimezoneOffset()/60
+        let startMins = document.getElementById('eveningChecked').checked? 540:360; //starting 6 am MT [6 * 60]
+
         for(let j = 0; j<partLen; j++ ){
             let joinTime = part.join_times[j];
             let leaveTime = part.leave_times[j];
-            let startMins = 360; //starting 6 am MT [6 * 60]
             let joinMins = joinTime.hours * 60 + joinTime.minutes;
             
             let offset = joinMins-startMins;
@@ -370,6 +372,21 @@ const updateJoin = (event)=>{
     let timeBox = document.getElementById('timebox')
     timeBox.style.top = `${event.pageY - timeBox.offsetHeight - 20}px`;
     timeBox.style.left = `${event.clientX - (.5*(timeBox.offsetWidth)) }px`;
+}
+
+const changeTimeline = ()=>{
+    for(let i = 0; i<13; i++){
+        if (document.getElementById('eveningChecked').checked){
+            i < 4 ?document.getElementById('l'+i).innerText = i + 9 :document.getElementById('l'+i).innerText = i - 3
+            i < 3 ?document.getElementById('l'+i).innerText += 'am' :document.getElementById('l'+i).innerText += 'pm'
+        }else{
+            i < 7 ?document.getElementById('l'+i).innerText = i + 6 :document.getElementById('l'+i).innerText = i - 6
+            i < 6 ?document.getElementById('l'+i).innerText += 'am' :document.getElementById('l'+i).innerText += 'pm'
+        }
+   
+
+    }
+    
 }
 
 updateBtn.addEventListener('click', addMarkers);
