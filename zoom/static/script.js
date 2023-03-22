@@ -126,7 +126,7 @@ const mergeTimes = (attendee)=>{
     for(i=1; i< attendee.join_times.length; i++){
         let nextJoin =attendee.join_times[i]
         let lastLeave = newLeaves[newLeaves.length-1]
-        if(nextJoin.hours === lastLeave.hours && (nextJoin.minutes == lastLeave.minutes || nextJoin.minutes +1 == lastLeave.minutes)){
+        if(nextJoin.hours === lastLeave.hours && (nextJoin.minutes == lastLeave.minutes || nextJoin.minutes -1 == lastLeave.minutes)){
                 //next join is equal or within 1 minute of last leave => merge them
                 newLeaves.pop()
                 newLeaves.push(attendee.leave_times[i])
