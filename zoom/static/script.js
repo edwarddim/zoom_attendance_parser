@@ -113,8 +113,33 @@ const getAttendance = async ()=>{
     const hashedIdToAttendee = mergeJoinTimes(attendeesWithId); // Merge all the records 
     const attendees = Object.values(hashedIdToAttendee); // Convert to an Array
     attendees.sort((a,b) => a.name.localeCompare(b.name)); // sort the records
-    attendees.forEach(attendee =>{updateAttendeesTime(attendee)})
+    attendees.forEach(attendee =>{updateAttendeesTime(attendee)});//Convert join and leaves to MT
+    attendees.forEach(attendee =>mergeTimes(attendee)); //Merge contiguous blocks of time.
     showAttendance(attendees); // display the records
+}
+
+
+const mergeTimes = (attendee)=>{
+    console.log(attendee)
+    let newJoins = [attendee.join_times[0]]
+    let newLeaves = [attendee.leave_times[0]]
+    for(i=1; i< attendee.join_times.length; i++){
+        let nextJoin =attendee.join_times[i]
+        let lastLeave = newLeaves[newLeaves.length-1]
+        if(nextJoin.hours === lastLeave.hours && (nextJoin.minutes == lastLeave.minutes || nextJoin.minutes +1 == lastLeave.minutes)){
+                //next join is equal or within 1 minute of last leave => merge them
+                newLeaves.pop()
+                newLeaves.push(attendee.leave_times[i])
+            
+        }else{
+            newJoins.push(nextJoin)
+            newLeaves.push(attendee.leave_times[i])
+        }
+
+    }
+    attendee.join_times = newJoins
+    attendee.leave_times = newLeaves
+    console.log(attendee)
 }
 
 const getMTOffset = () => {
