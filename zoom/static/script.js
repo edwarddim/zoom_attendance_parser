@@ -120,9 +120,9 @@ const getAttendance = async ()=>{
 
 
 const mergeTimes = (attendee)=>{
-    console.log(attendee)
     let newJoins = [attendee.join_times[0]]
     let newLeaves = [attendee.leave_times[0]]
+    let newDurations = []
     for(i=1; i< attendee.join_times.length; i++){
         let nextJoin =attendee.join_times[i]
         let lastLeave = newLeaves[newLeaves.length-1]
@@ -132,14 +132,20 @@ const mergeTimes = (attendee)=>{
                 newLeaves.push(attendee.leave_times[i])
             
         }else{
+            newDurations.push(differenceInMinutes(newJoins[newJoins.length-1],newLeaves[newLeaves.length-1]))
             newJoins.push(nextJoin)
             newLeaves.push(attendee.leave_times[i])
         }
-
     }
+    newDurations.push(differenceInMinutes(newJoins[newJoins.length-1],newLeaves[newLeaves.length-1]))
     attendee.join_times = newJoins
     attendee.leave_times = newLeaves
+    attendee.durations= newDurations
     console.log(attendee)
+}
+
+const differenceInMinutes = (start,end)=>{
+    return (((end.hours - start.hours)* 60) + (end.minutes > start.minutes? end.minutes-start.minutes: -start.minutes + end.minutes))
 }
 
 const getMTOffset = () => {
@@ -303,7 +309,7 @@ const showAttendance = (participantsArr) => {
             }
         }
 
-        totalTime = Math.round(totalTime / 60);
+        
         td2.innerHTML = `<div id="${part.name}" class="timeline-container">${tempHTML}</div>`;
         
         td3.innerText = totalTime + " Min(s)";
