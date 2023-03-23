@@ -330,7 +330,7 @@ const addMarkers = (event) => {
     event.preventDefault();
     // add a date so we can count ms just basing everything at start for lower numbers
     const refDate = "1970-01-01T";
-    const dayStart = new Date("1970-01-01T06:00");
+    const dayStart = document.getElementById('eveningChecked').checked? new Date("1970-01-01T09:00"):new Date("1970-01-01T06:00");
 
     const p1s = (document.getElementById("first-period-start").value ? new Date(refDate + document.getElementById("first-period-start").value) : null);
     const p1e = (document.getElementById("first-period-end").value ? new Date(refDate + document.getElementById("first-period-end").value) : null);
