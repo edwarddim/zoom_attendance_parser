@@ -44,9 +44,9 @@ const getUser = ()=>{
     
     .then(res=>res.json())
         .then(data=>{
-            console.log('welcome instructor', data.user)
+            //console.log('welcome instructor', data.user)
             userlist.value = data.user.id;
-            console.log('userlist',userlist)
+            //console.log('userlist',userlist)
             getMeetings();
         })
     .catch(err=>{
@@ -69,7 +69,7 @@ const addMeetingElem =(meeting)=>{
 //Get Meetings makes the request to the back end to get the meetings for the 
 // drop down list
 const getMeetings = ()=>{
-    console.log('getting meetings ',userlist.value);
+    //console.log('getting meetings ',userlist.value);
     meetingslist.innerHTML = '';
     occurrenceslist.innerHTML = '';
     fetch('http://localhost:8000/meetings/'+userlist.value,{method:"POST"})
