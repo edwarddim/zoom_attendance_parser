@@ -26,7 +26,13 @@
                 <form
                     action="https://zoom.us/oauth/authorize?response_type=code&client_id=tPvv5m4oQLKZVJy9xGlx2A&redirect_uri=http://localhost:8000/success"
                     method="post">
-                    <p class="purple">Click here to authorize your account</p>
+                    <p class="purple">Admins Click here to authorize your account</p>
+                    <input class="btn btn-dark" type="submit" value="authorize">
+                </form>
+                <form
+                    action="https://zoom.us/oauth/authorize?response_type=code&client_id=gRtntddzTZWRDPpeE03uLA&redirect_uri=http://localhost:8000/instructorsuccess"
+                    method="post">
+                    <p class="purple">Instructors Click here to authorize your account</p>
                     <input class="btn btn-dark" type="submit" value="authorize">
                 </form>
             </div>

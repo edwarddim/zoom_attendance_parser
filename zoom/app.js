@@ -28,7 +28,7 @@ app.get('/page', (req,res)=>{
     }else { 
         if(checkRefresh(req)){
             //console.log('about to render',req.session)
-            res.render('attendance')
+            req.session['admin']?res.render('admin'):res.render('attendance')
         }else{
             req.session['authorized'] = false;
             res.redirect('/')
@@ -37,6 +37,45 @@ app.get('/page', (req,res)=>{
 })
 
 //single endpoint for Oauth Requests
+//user : Z1J0bnRkZHpUWldSRFBwZUUwM3VMQTpPaGtYMjE4b2J2M1Q4b3pPWXBWWWFKU1BVTEJ5aTcyWg==
+//admin : dFB2djVtNG9RTEtaVkp5OXhHbHgyQTp1Z3YyQnV0YkhrdjJ5ZHBxN1YydGlIUFB0NHhDblJ5OA==
+app.get('/instructorsuccess', async (req,res)=>{
+    const accessToken = req.query.code
+
+    var config ={
+        method: 'post',
+        url: 'https://zoom.us/oauth/token',
+        headers:{
+            //"Basic " plus Base64-encoded clientID:clientSECRET from https://www.base64encode.org/
+            'Authorization' :'Basic ' + 'Z1J0bnRkZHpUWldSRFBwZUUwM3VMQTpPaGtYMjE4b2J2M1Q4b3pPWXBWWWFKU1BVTEJ5aTcyWg==',
+            'content-type' : 'application/x-www-form-urlencoded'
+        },
+        data:{
+            "code": accessToken,
+            "grant_type": "authorization_code",
+            "redirect_uri": "http://localhost:8000/instructorsuccess",
+        }
+    }
+
+    //axios request => res.data = {access_token: ... , token_type: ..., refresh_token: ..., expires_in: ..., scope: ...}
+    var result = await axios(config)
+    .then(res =>{
+        //console.log(res.data);
+        req.session['authorized'] = true;
+        req.session['admin'] = false;
+        req.session['access_token'] = res.data.access_token
+        req.session['refresh_token'] = res.data.refresh_token
+        req.session['refresh'] = new Date().getTime()+1800000
+        req.session['expires'] = new Date().getTime()+3599000
+        //console.log(req.session['expires'])
+    }).catch(err =>{
+        console.log(err.data);
+        req.session['authorized'] = false;
+    })
+    
+    res.redirect('/page');
+})
+
 app.get('/success', async (req,res)=>{
         //console.log(req.query.code)
         //user authentication token
@@ -62,6 +101,7 @@ app.get('/success', async (req,res)=>{
         .then(res =>{
             //console.log(res.data);
             req.session['authorized'] = true;
+            req.session['admin'] = true;
             req.session['access_token'] = res.data.access_token
             req.session['refresh_token'] = res.data.refresh_token
             req.session['refresh'] = new Date().getTime()+1800000
@@ -159,6 +199,38 @@ app.post('/users', async (req,res)=>{
         console.log(err.data)
     })
 })
+app.post('/user', async (req,res)=>{
+
+    if(!checkRefresh(req)){
+        req.session.authorized = false;
+        res.json({'error':'authenticate'})
+        return
+    }
+
+    var config ={
+        method: 'get',
+        url: 'https://zoom.us/v2/users/me',
+        headers:{
+            //"Basic " plus Base64-encoded clientID:clientSECRET from https://www.base64encode.org/
+            'Authorization' :'Bearer ' + req.session['access_token'],
+        },
+        
+    }
+
+    //axios request => res.data = {access_token: ... , token_type: ..., refresh_token: ..., expires_in: ..., scope: ...}
+    
+    var result = await axios(config)
+    .then(async data =>{
+        //console.log('data',Object.keys(data.data));
+        
+        userData = (data.data);
+        //console.log('after userData');
+            res.json({'user':userData});
+        //console.log(userData);
+    }).catch(err =>{
+        console.log(err.data)
+    })
+})
 //get list of meetings for a user
 app.post('/meetings/:userId', async (req,res)=>{
     //console.log('resquesting meetings for userId',req.params.userId)
@@ -229,7 +301,7 @@ app.post('/part/:meetingId', async (req,res)=>{
     //console.log('parts id',req.params.meetingId);
     var config ={
         method: 'get',
-        url: `https://zoom.us/v2/report/meetings/${req.params.meetingId}/participants?page_size=300`,
+        url: `https://zoom.us/v2/past_meetings/${req.params.meetingId}/participants?page_size=300`,
         headers:{
             //"Basic " plus Base64-encoded clientID:clientSECRET from https://www.base64encode.org/
             'Authorization' :'Bearer ' + req.session['access_token'],

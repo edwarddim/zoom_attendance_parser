@@ -3,7 +3,7 @@
     and Jim Reeder v.1.0
 */
 
-let userlist = document.getElementById('usersSelect')
+let userlist = isAdmin?document.getElementById('usersSelect'):{};
 let meetingslist = document.getElementById('meetingsList')
 let occurrenceslist = document.getElementById('occurrencesList')
 
@@ -39,8 +39,22 @@ const getUsers = ()=>{
         console.log(err)
     })
 }
+const getUser = ()=>{
+    fetch('http://localhost:8000/user',{method:'POST'})
+    
+    .then(res=>res.json())
+        .then(data=>{
+            console.log('welcome instructor', data.user)
+            userlist.value = data.user.id;
+            console.log('userlist',userlist)
+            getMeetings();
+        })
+    .catch(err=>{
+        console.log(err)
+    })
+}
 
-getUsers()
+isAdmin?getUsers():getUser();
 
 
 // Add meeting element is used in getMeetings() to add options to the list
@@ -55,6 +69,7 @@ const addMeetingElem =(meeting)=>{
 //Get Meetings makes the request to the back end to get the meetings for the 
 // drop down list
 const getMeetings = ()=>{
+    console.log('getting meetings ',userlist.value);
     meetingslist.innerHTML = '';
     occurrenceslist.innerHTML = '';
     fetch('http://localhost:8000/meetings/'+userlist.value,{method:"POST"})
