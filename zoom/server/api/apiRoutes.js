@@ -64,7 +64,7 @@ module.exports = (app)=>{
         // }
         apiController.getUser(req,res);
     })
-    //get list of meetings for a user
+    //admin route to retrieve list of meetings for a specific user
     app.post('/meetings/:userId', async (req,res)=>{
         //console.log('resquesting meetings for userId',req.params.userId)
         // if(!checkRefresh(req)){
@@ -72,29 +72,11 @@ module.exports = (app)=>{
         //     res.json({'error':'authenticate'})
         //     return
         // }
-        var config ={
-            method: 'get',
-            url: 'https://zoom.us/v2/users/'+req.params.userId+'/meetings?page_size=300',
-            headers:{
-                //"Basic " plus Base64-encoded clientID:clientSECRET from https://www.base64encode.org/
-                'Authorization' :'Bearer ' + req.session['access_token'],
-            },
-            
-        }
-        var meetings =[]
-        //axios request => res.data = {access_token: ... , token_type: ..., refresh_token: ..., expires_in: ..., scope: ...}
-        var result = await axios(config).then(data =>{
-            //console.log(data.data)
-            meetings = data.data.meetings;
-            res.json({meetings:meetings})
-        }).catch(err =>{
-            console.log(err.data)
-        })
-        //console.log('result is',result)
+        apiController.getMeetingsForUser(req,res);
     })
 
 
-    //get details of a specific meeting
+    //route to get occurrences of a specific meeting
     app.post('/meeting/:meetingId', async (req,res)=>{
         //console.log('resquesting meeting details',req.params.meetingId)
         // if(!checkRefresh(req)){
@@ -102,25 +84,7 @@ module.exports = (app)=>{
         //     res.json({'error':'authenticate'})
         //     return
         // }
-        var config ={
-            method: 'get',
-            url: 'https://zoom.us/v2/past_meetings/'+req.params.meetingId+'/instances?page_size=300',
-            headers:{
-                //"Basic " plus Base64-encoded clientID:clientSECRET from https://www.base64encode.org/
-                'Authorization' :'Bearer ' + req.session['access_token'],
-            },
-            
-        }
-        var details ={}
-        
-        var result = await axios(config).then(data =>{
-            //console.log(data.data)
-            details = data.data;
-            res.json({occurrences:details.meetings})
-        }).catch(err =>{
-            console.log(err.data)
-        })
-        //console.log('result is',result)
+        apiController.getMeetingOccurrences(req,res);
     })
 
     //fetch participants list
@@ -132,37 +96,7 @@ module.exports = (app)=>{
         //     return
         // }
         //console.log('parts id',req.params.meetingId);
-        var config ={
-            method: 'get',
-            url: `https://zoom.us/v2/past_meetings/${req.params.meetingId}/participants?page_size=300`,
-            headers:{
-                //"Basic " plus Base64-encoded clientID:clientSECRET from https://www.base64encode.org/
-                'Authorization' :'Bearer ' + req.session['access_token'],
-            },
-            
-        }
-
-        let participants = [];
-        var result = await axios(config).then(async data =>{
-            let next_page_token = data.data.next_page_token
-            //data.data = {page_count: 1, page_size: 300, total_records: 155, next_page_token: '', participants: Array(155)}
-            //console.log('data'+data.data)
-            data.data.participants.forEach(participant =>{
-                participants.push(participant)
-            })
-            while(data.data.total_records > participants.length){
-                config.url=`https://zoom.us/v2/report/meetings/${req.params.meetingId}/participants?page_size=300&next_page_token=${next_page_token}`;
-                //console.log(config);
-                var next = await axios(config).then(moreData =>{
-                    //console.log('moredata',moreData);
-                    next_page_token = moreData.data.next_page_token
-                    participants = participants.concat(moreData.data.participants)
-                })
-            }
-            res.json({'participants':participants})
-        }).catch(err =>{
-            console.log('err' + err)
-        })
+        apiController.getMeetingParticipants(req,res);
     })
 
 

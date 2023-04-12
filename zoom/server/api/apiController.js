@@ -103,6 +103,84 @@ module.exports = {
             console.log(err.data)
         })
     },
+    //function to get single users list of meetings
+    //responds with JSON {'meetings':[{meetingdata}...]}
+    'getMeetingsForUser':async(req,res)=>{
+        var config ={
+            method: 'get',
+            url: 'https://zoom.us/v2/users/'+req.params.userId+'/meetings?page_size=300',
+            headers:{
+                //"Basic " plus Base64-encoded clientID:clientSECRET from https://www.base64encode.org/
+                'Authorization' :'Bearer ' + req.session['access_token'],
+            },
+            
+        }
+        var meetings =[]
+        //axios request => res.data = {access_token: ... , token_type: ..., refresh_token: ..., expires_in: ..., scope: ...}
+        var result = await axios(config).then(data =>{
+            //console.log(data.data)
+            meetings = data.data.meetings;
+            res.json({meetings:meetings})
+        }).catch(err =>{
+            console.log(err.data)
+        })
+    },
+    //function to get details for single reoccuring meeting
+    //responds with JSON {'occurrences':[{meetingDetails}...]}
+    'getMeetingOccurrences':async(req,res)=>{
+        var config ={
+            method: 'get',
+            url: 'https://zoom.us/v2/past_meetings/'+req.params.meetingId+'/instances?page_size=300',
+            headers:{
+                //"Basic " plus Base64-encoded clientID:clientSECRET from https://www.base64encode.org/
+                'Authorization' :'Bearer ' + req.session['access_token'],
+            },
+            
+        }
+        var details ={}
+        
+        var result = await axios(config).then(data =>{
+            //console.log(data.data)
+            details = data.data;
+            res.json({occurrences:details.meetings})
+        }).catch(err =>{
+            console.log(err.data)
+        })
+    },
+    //function to get list of partcipants for a single meeting
+    //responds with JSON {'participants':[{participantDetails}...]}
+    'getMeetingParticipants':async(req,res)=>{
+        var config ={
+            method: 'get',
+            url: `https://zoom.us/v2/past_meetings/${req.params.meetingId}/participants?page_size=300`,
+            headers:{
+                //"Basic " plus Base64-encoded clientID:clientSECRET from https://www.base64encode.org/
+                'Authorization' :'Bearer ' + req.session['access_token'],
+            },
+            
+        }
 
+        let participants = [];
+        var result = await axios(config).then(async data =>{
+            let next_page_token = data.data.next_page_token
+            //data.data = {page_count: 1, page_size: 300, total_records: 155, next_page_token: '', participants: Array(155)}
+            //console.log('data'+data.data)
+            data.data.participants.forEach(participant =>{
+                participants.push(participant)
+            })
+            while(data.data.total_records > participants.length){
+                config.url=`https://zoom.us/v2/past_meetings/${req.params.meetingId}/participants?page_size=300&next_page_token=${next_page_token}`;
+                //console.log(config);
+                var next = await axios(config).then(moreData =>{
+                    //console.log('moredata',moreData);
+                    next_page_token = moreData.data.next_page_token
+                    participants = participants.concat(moreData.data.participants)
+                })
+            }
+            res.json({'participants':participants})
+        }).catch(err =>{
+            console.log('err' + err)
+        })
+    }
 
 }
