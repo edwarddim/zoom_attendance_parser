@@ -5,18 +5,14 @@ const apiController = require('./apiController')
 module.exports = (app)=>{
     //callback route for zoom api for instructor Oauth Requests
     app.get('/instructorsuccess', async (req,res)=>{
-        console.log('instructor login')
+        //console.log('instructor login')
         apiController.loginCB(req,res,false);
     })
     //callback route for zoom api for admin Oauth Requests
     app.get('/success', async (req,res)=>{
-        console.log('admin login')
+        //console.log('admin login')
         apiController.loginCB(req,res,true);
     })
-
-
-    
-
     const refreshToken = async (req,now) => {
         var config ={
             method: 'post',
@@ -75,7 +71,6 @@ module.exports = (app)=>{
         apiController.getMeetingsForUser(req,res);
     })
 
-
     //route to get occurrences of a specific meeting
     app.post('/meeting/:meetingId', async (req,res)=>{
         //console.log('resquesting meeting details',req.params.meetingId)
@@ -98,7 +93,6 @@ module.exports = (app)=>{
         //console.log('parts id',req.params.meetingId);
         apiController.getMeetingParticipants(req,res);
     })
-
 
     app.get('/logout', (req,res)=>{
         req.session.destroy()
