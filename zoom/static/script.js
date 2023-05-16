@@ -12,7 +12,8 @@ let timeOptions ={
     weekday: "short",
     year: "numeric",
     month: "short",
-    day: "2-digit"
+    day: "2-digit",
+    timeZone:'America/Denver'
 }
 
 // *******************************************************************************************
@@ -136,11 +137,19 @@ const getAttendance = async ()=>{
 
 const mergeTimes = (attendee)=>{
     let newJoins = [attendee.join_times[0]]
+    if (newJoins[0].hours < 6){newJoins[0].hours = 6;newJoins[0].minutes = 0}
     let newLeaves = [attendee.leave_times[0]]
+    if(newLeaves[0].hours > 21){newLeaves[0].hours = 22;newLeaves[0].minutes = 0}
+    if(newLeaves[0].hours < 6){newLeaves[0].hours = 6; newLeaves[0].minutes = 0}
     let newDurations = []
     for(i=1; i< attendee.join_times.length; i++){
         let nextJoin =attendee.join_times[i]
+        if(nextJoin.hours < newJoins[newJoins.length -1].hours || nextJoin.hours > 21){
+            continue
+        }
         let lastLeave = newLeaves[newLeaves.length-1]
+        // if(lastLeave[0].hours > 21){lastLeave[0].hours = 22;lastLeave[0].minutes = 0}
+        // if(lastLeave[0].hours < 6){lastLeave[0].hours = 6; lastLeave[0].minutes = 0}
         if(nextJoin.hours === lastLeave.hours && (nextJoin.minutes == lastLeave.minutes || nextJoin.minutes -1 == lastLeave.minutes)){
                 //next join is equal or within 1 minute of last leave => merge them
                 newLeaves.pop()
@@ -148,8 +157,18 @@ const mergeTimes = (attendee)=>{
             
         }else{
             newDurations.push(differenceInMinutes(newJoins[newJoins.length-1],newLeaves[newLeaves.length-1]))
+            if(nextJoin.hours > 21 || nextJoin.hours < 6){
+                break
+            }
             newJoins.push(nextJoin)
-            newLeaves.push(attendee.leave_times[i])
+            nextLeave = attendee.leave_times[i]
+            if(nextLeave.hours > 21 || nextLeave.hours < 6){
+                nextLeave.hours = 22;
+                nextLeave.minutes = 0;
+                newLeaves.push(nextLeave)
+                break
+            }
+            newLeaves.push(nextLeave)
         }
     }
     newDurations.push(differenceInMinutes(newJoins[newJoins.length-1],newLeaves[newLeaves.length-1]))
@@ -160,7 +179,7 @@ const mergeTimes = (attendee)=>{
 }
 
 const differenceInMinutes = (start,end)=>{
-    return (((end.hours - start.hours)* 60) + (end.minutes > start.minutes? end.minutes-start.minutes: -start.minutes + end.minutes))
+    return((start.day==end.day?(end.hours - start.hours):(24+end.hours - start.hours))*60+(end.minutes > start.minutes? end.minutes-start.minutes: -start.minutes + end.minutes))
 }
 
 const getMTOffset = () => {
@@ -194,11 +213,14 @@ const updateAttendeesTime = (attendee) =>{
 //date time string => {day:string, hours:int, minutes:int} in MT
 const convertToWorkingTime = (dateTime) =>{
     let userOffSet = new Date().getTimezoneOffset()/60
+    //console.log('userOffset', userOffSet, dateTime.getHours(), dateTime.toString())
+    //console.log(dateTime,new Date(dateTime - (getMTOffset()*3600000)+(userOffSet*3600000)))
     const workingTime = {
-        day:dateTime.toLocaleString('en',timeOptions),
-        hours:dateTime.getHours() -getMTOffset() + userOffSet,
+        day:Intl.DateTimeFormat('en-Us',timeOptions).format(dateTime),
+        hours:new Date(dateTime - (getMTOffset()*3600000)+(userOffSet*3600000)).getHours(),
         minutes:dateTime.getMinutes()
     }
+    console.log(workingTime)
     return workingTime
 }
 
